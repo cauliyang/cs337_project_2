@@ -36,8 +36,6 @@ make lint
 
 ## Project Description
 
-- <https://github.com/simon-benigeri/gg-project/blob/main/README.md>
-
 - Free software: MIT License
 
 ## Credits
