@@ -1,6 +1,6 @@
-# Award
+# Recipe Bot
 
-Extract awards from tweets. Developed for group 4 in CS337, Fall 2025.
+Developed by group 4 in CS337, Fall 2025.
 
 ## Members
 
