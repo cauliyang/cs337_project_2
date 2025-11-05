@@ -1,0 +1,64 @@
+[project]
+name = "recipebot"
+version = "0.1.0"
+description = "Parsing recipes to support conversational interaction"
+readme = "README.md"
+authors = [{ name = "Group 4" }]
+classifiers = [
+  # TODO
+]
+license = { text = "MIT" }
+dependencies = [
+  "cinemagoer>=2023.5.1",
+  "ftfy>=6.3.1",
+  "inflection>=0.5.1",
+  "langdetect>=1.0.9",
+  "nltk>=3.9.2",
+  "pydantic>=2.11.9",
+  "spacy>=3.8.7",
+  "typer",
+  "unidecode>=1.4.0",
+  "en-core-web-md @ https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.8.0/en_core_web_md-3.8.0-py3-none-any.whl",
+  "thefuzz>=0.22.1",
+]
+requires-python = ">= 3.10"
+
+[dependency-groups]
+dev = [
+  "coverage",     # testing
+  "pytest",       # testing
+  "ruff",         # linting
+  "ty",           # checking types
+  "ipdb",         # debugging
+  "rich>=14.1.0",
+]
+
+[project.urls]
+bugs = "https://github.com/cauliyang/cs337_project_2/issues"
+homepage = "https://github.com/cauliyang/cs337_project_2"
+
+[project.scripts]
+award = "recipebot.__main__:app"
+
+[tool.ty]
+# All rules are enabled as "error" by default; no need to specify unless overriding.
+# Example override: relax a rule for the entire project (uncomment if needed).
+# rules.TY015 = "warn"  # For invalid-argument-type, warn instead of error.
+
+[tool.ty.src]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+  "E",  # pycodestyle errors
+  "W",  # pycodestyle warnings
+  "F",  # Pyflakes
+  "I",  # isort
+  "B",  # flake8-bugbear
+  "UP", # pyupgrade
+]
+
+[tool.uv]
+package = true
