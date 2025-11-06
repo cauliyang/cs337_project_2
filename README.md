@@ -30,6 +30,9 @@ uv run pytest -vls
 # or
 make test
 
+# add Dependency
+uv add requests
+
 # run the linter before pushing
 make lint
 ```
