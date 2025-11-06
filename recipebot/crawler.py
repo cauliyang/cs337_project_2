@@ -1,6 +1,6 @@
+
 import requests
 from bs4 import BeautifulSoup
-import re
 
 
 class Ingredient:
@@ -19,11 +19,11 @@ class Ingredient:
             parts.append(self.unit)
         if self.name:
             parts.append(self.name)
-        #if self.preparation:
-            #parts.append(f"({self.preparation})")
-        #if self.misc:
-            #parts.append(f"{self.misc}")
-        return " ".join(parts)
+        # if self.preparation:
+        # parts.append(f"({self.preparation})")
+        # if self.misc:
+        # parts.append(f"{self.misc}")
+        return f"Ingredients({' '.join(parts)})"
 
 
 def scrape_recipe(url):
@@ -35,8 +35,8 @@ def scrape_recipe(url):
     return i, d
 
 
-
 ########################## INDIVIDUAL WEBSITE SCRAPERS #################################
+
 
 def scrape_allrecipes(url):
     response = requests.get(url)
@@ -47,7 +47,9 @@ def scrape_allrecipes(url):
     ingredients = []
     for item in soup.select(".mm-recipes-structured-ingredients__list li"):
         i = Ingredient()
-        for span in item.select("span[data-ingredient-quantity], span[data-ingredient-unit], span[data-ingredient-name], span[data-ingredient-preparation]"):
+        for span in item.select(
+            "span[data-ingredient-quantity], span[data-ingredient-unit], span[data-ingredient-name], span[data-ingredient-preparation]"
+        ):
             if span.has_attr("data-ingredient-quantity") and i.quantity is None:
                 i.quantity = span.get_text(strip=True)
             elif span.has_attr("data-ingredient-unit") and i.unit is None:
@@ -59,24 +61,18 @@ def scrape_allrecipes(url):
 
         # Catch any remaining text or spans as "misc"
         misc_parts = [
-            t.strip()
-            for t in item.stripped_strings
-            if t.strip() not in {i.quantity, i.unit, i.name, i.preparation}
+            t.strip() for t in item.stripped_strings if t.strip() not in {i.quantity, i.unit, i.name, i.preparation}
         ]
         if misc_parts:
             i.misc = "".join(misc_parts)
 
         ingredients.append(i)
-        
-
 
     # Directions
     directions = []
     steps_section = soup.select_one("div#mm-recipes-steps_1-0")
     if steps_section:
-        step_groups = steps_section.select(
-            ".comp.mntl-sc-block.mntl-sc-block-startgroup.mntl-sc-block-group--LI"
-        )
+        step_groups = steps_section.select(".comp.mntl-sc-block.mntl-sc-block-startgroup.mntl-sc-block-group--LI")
         for group in step_groups:
             html_blocks = group.select(".comp.mntl-sc-block.mntl-sc-block-html")
             for block in html_blocks:
@@ -85,7 +81,6 @@ def scrape_allrecipes(url):
                     directions.append(text)
 
     return ingredients, directions
-
 
 
 def scrape_seriouseats(url):
@@ -97,7 +92,9 @@ def scrape_seriouseats(url):
     ingredients = []
     for item in soup.select(".structured-ingredients__list-item"):
         i = Ingredient()
-        for span in item.select("span[data-ingredient-quantity], span[data-ingredient-unit], span[data-ingredient-name], span[data-ingredient-preparation]"):
+        for span in item.select(
+            "span[data-ingredient-quantity], span[data-ingredient-unit], span[data-ingredient-name], span[data-ingredient-preparation]"
+        ):
             if span.has_attr("data-ingredient-quantity") and i.quantity is None:
                 i.quantity = span.get_text(strip=True)
             elif span.has_attr("data-ingredient-unit") and i.unit is None:
@@ -107,18 +104,14 @@ def scrape_seriouseats(url):
             elif span.has_attr("data-ingredient-preparation") and i.preparation is None:
                 i.preparation = span.get_text(strip=True)
 
-
         # Catch any remaining text or spans as "misc"
         misc_parts = [
-            t.strip()
-            for t in item.stripped_strings
-            if t.strip() not in {i.quantity, i.unit, i.name, i.preparation}
+            t.strip() for t in item.stripped_strings if t.strip() not in {i.quantity, i.unit, i.name, i.preparation}
         ]
         if misc_parts:
             i.misc = " ".join(misc_parts)
 
         ingredients.append(i)
-
 
     # Directions
     directions = []
@@ -131,6 +124,4 @@ def scrape_seriouseats(url):
             if d.get_text(strip=True)
         ]
 
-
     return ingredients, directions
-
