@@ -1,4 +1,5 @@
 import pytest
+from rich import print
 
 from recipebot.crawler import scrape_allrecipes, scrape_recipe
 

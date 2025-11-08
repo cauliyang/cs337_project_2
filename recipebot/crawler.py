@@ -1,29 +1,7 @@
-
 import requests
 from bs4 import BeautifulSoup
 
-
-class Ingredient:
-    def __init__(self, quantity=None, unit=None, name=None, preparation=None, misc=None):
-        self.quantity = quantity
-        self.unit = unit
-        self.name = name
-        self.preparation = preparation
-        self.misc = misc
-
-    def __repr__(self):
-        parts = []
-        if self.quantity:
-            parts.append(str(self.quantity))
-        if self.unit:
-            parts.append(self.unit)
-        if self.name:
-            parts.append(self.name)
-        # if self.preparation:
-        # parts.append(f"({self.preparation})")
-        # if self.misc:
-        # parts.append(f"{self.misc}")
-        return f"Ingredients({' '.join(parts)})"
+from recipebot.model import Ingredient
 
 
 def scrape_recipe(url):
@@ -31,11 +9,7 @@ def scrape_recipe(url):
         i, d = scrape_allrecipes(url)
     elif "seriouseats.com" in url:
         i, d = scrape_seriouseats(url)
-
     return i, d
-
-
-########################## INDIVIDUAL WEBSITE SCRAPERS #################################
 
 
 def scrape_allrecipes(url):
@@ -46,27 +20,26 @@ def scrape_allrecipes(url):
     # Ingredients
     ingredients = []
     for item in soup.select(".mm-recipes-structured-ingredients__list li"):
-        i = Ingredient()
-        for span in item.select(
-            "span[data-ingredient-quantity], span[data-ingredient-unit], span[data-ingredient-name], span[data-ingredient-preparation]"
-        ):
-            if span.has_attr("data-ingredient-quantity") and i.quantity is None:
-                i.quantity = span.get_text(strip=True)
-            elif span.has_attr("data-ingredient-unit") and i.unit is None:
-                i.unit = span.get_text(strip=True)
-            elif span.has_attr("data-ingredient-name") and i.name is None:
-                i.name = span.get_text(strip=True)
-            elif span.has_attr("data-ingredient-preparation") and i.preparation is None:
-                i.preparation = span.get_text(strip=True)
+        ingredient = Ingredient(
+            name=item.select_one("span[data-ingredient-name]").get_text(strip=True),
+            quantity=item.select_one("span[data-ingredient-quantity]").get_text(strip=True),
+            unit=res.get_text(strip=True)
+            if (res := item.select_one("span[data-ingredient-unit]")) is not None
+            else None,
+            preparation=res.get_text(strip=True)
+            if (res := item.select_one("span[data-ingredient-preparation]")) is not None
+            else None,
+        )
 
         # Catch any remaining text or spans as "misc"
         misc_parts = [
-            t.strip() for t in item.stripped_strings if t.strip() not in {i.quantity, i.unit, i.name, i.preparation}
+            t.strip()
+            for t in item.stripped_strings
+            if t.strip() not in {ingredient.quantity, ingredient.unit, ingredient.name, ingredient.preparation}
         ]
         if misc_parts:
-            i.misc = "".join(misc_parts)
-
-        ingredients.append(i)
+            ingredient.misc = "".join(misc_parts)
+        ingredients.append(ingredient)
 
     # Directions
     directions = []
@@ -93,7 +66,7 @@ def scrape_seriouseats(url):
     for item in soup.select(".structured-ingredients__list-item"):
         i = Ingredient()
         for span in item.select(
-            "span[data-ingredient-quantity], span[data-ingredient-unit], span[data-ingredient-name], span[data-ingredient-preparation]"
+            "span[data-ingredient-quantity], span[data-ingredient-unit], span[data-ingredient-name], span[data-ingredient-preparation]"  # noqa: E501
         ):
             if span.has_attr("data-ingredient-quantity") and i.quantity is None:
                 i.quantity = span.get_text(strip=True)
