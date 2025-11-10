@@ -9,7 +9,6 @@ classifiers = [
 ]
 license = { text = "MIT" }
 dependencies = [
-  "cinemagoer>=2023.5.1",
   "ftfy>=6.3.1",
   "inflection>=0.5.1",
   "langdetect>=1.0.9",
@@ -25,6 +24,7 @@ dependencies = [
   "pydantic-ai>=1.12.0",
   "rich>=14.2.0",
   "types-requests>=2.32.4.20250913",
+  "python-dotenv>=1.2.1",
 ]
 requires-python = ">= 3.10"
 
