@@ -22,6 +22,50 @@ uv sync
 
 ```
 
+## Run the bot
+
+```sh
+source .venv/bin/activate
+
+cd rasa
+
+# run the action server
+rasa run actions
+
+# run the shell and talk with the bot
+rasa shell
+```
+
+### Debugging the bot
+
+```sh
+# Visualize stories
+rasa visualize
+```
+
+### Caveats
+
+In macOS with M chip, we need to install NumPy 1.26.4 manually before running the bot.
+
+```sh
+uv sync
+
+# fix api mismatch error
+uv pip install --no-binary=numpy "numpy==1.26.4"
+
+# source the venv
+source .venv/bin/activate
+
+# cd to rasa
+cd rasa
+
+# run the action server
+rasa run actions
+
+# run the shell and talk with the bot
+rasa shell
+```
+
 ## Development
 
 ```sh

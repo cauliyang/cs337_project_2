@@ -1,0 +1,243 @@
+version: "3.1"
+
+nlu:
+  # ===== Recipe Retrieval =====
+  - intent: provide_recipe_url
+    examples: |
+      - https://www.allrecipes.com/recipe/218091/classic-and-simple-meat-lasagna/
+      - https://www.seriouseats.com/wiener-schnitzel-recipe-11849886
+      - here's the recipe: https://www.allrecipes.com/recipe/20096/cheesy-ham-and-hash-brown-casserole/
+      - I want to make https://www.bonappetit.com/recipe/pasta-carbonara
+
+  - intent: show_ingredients
+    examples: |
+      - show me the ingredients
+      - show the ingredients list
+      - what ingredients do I need
+      - list the ingredients
+      - display ingredients
+      - ingredients please
+      - what do I need for this recipe
+      - show me what I need
+      - what's in this recipe
+      - tell me the ingredients
+      - I need to know the ingredients
+      - give me the ingredient list
+
+  - intent: show_steps
+    examples: |
+      - show me the steps
+      - go over the recipe steps
+      - walk me through the steps
+      - show directions
+      - what are the steps
+      - recipe steps please
+      - take me through the recipe
+      - how do I make this
+      - what are the directions
+      - show me how to make it
+      - guide me through the recipe
+
+  - intent: show_full_recipe
+    examples: |
+      - show me the recipe
+      - display the recipe
+      - show the full recipe
+      - what's the recipe
+      - give me the whole recipe
+      - show everything
+
+  # ===== Navigation =====
+  - intent: navigate_next
+    examples: |
+      - next step
+      - go to the next step
+      - what's next
+      - next
+      - continue
+      - proceed
+      - move to next step
+      - what do I do next
+      - keep going
+      - move forward
+      - go on
+
+  - intent: navigate_previous
+    examples: |
+      - go back
+      - previous step
+      - go back one step
+      - back
+      - what was the previous step
+      - step back
+      - go to the last step
+      - return to previous
+      - undo
+      - rewind
+
+  - intent: navigate_first
+    examples: |
+      - start over
+      - go to the first step
+      - take me to the beginning
+      - restart
+      - begin again
+      - first step please
+      - start from the beginning
+      - reset
+      - go to step one
+
+  - intent: navigate_specific
+    examples: |
+      - go to step [5](step_number)
+      - show me step [3](step_number)
+      - take me to step [10](step_number)
+      - jump to step [2](step_number)
+      - I want step [7](step_number)
+      - show step [4](step_number)
+
+  - intent: repeat_step
+    examples: |
+      - repeat please
+      - say that again
+      - what was that again
+      - repeat
+      - can you repeat that
+      - one more time
+      - say it again
+      - repeat the step
+      - what did you say
+      - tell me again
+
+  # ===== Step Parameter Queries =====
+  - intent: ask_temperature
+    examples: |
+      - what temperature should the oven be
+      - what temp
+      - oven temperature
+      - how hot should it be
+      - what temperature
+      - at what temperature do I cook this
+      - what's the cooking temperature
+      - how hot
+      - temperature please
+      - what's the temp
+
+  - intent: ask_time
+    examples: |
+      - how long do I bake it
+      - how long do I cook this
+      - cooking time
+      - how much time
+      - when is it done
+      - how long does this take
+      - what's the cooking time
+      - for how long
+      - how many minutes
+      - duration please
+
+  - intent: ask_quantity
+    examples: |
+      - how much [salt](ingredient) do I need
+      - how much [flour](ingredient)
+      - how many [eggs](ingredient)
+      - quantity of [butter](ingredient)
+      - how much of [that](ingredient) do I need
+      - how much [sugar](ingredient) should I use
+      - how many cups of [milk](ingredient)
+      - [onion](ingredient) quantity
+      - amount of [cheese](ingredient)
+      - how much [water](ingredient)
+
+  - intent: ask_substitution
+    examples: |
+      - what can I use instead of [butter](ingredient)
+      - substitute for [eggs](ingredient)
+      - replacement for [milk](ingredient)
+      - alternative to [flour](ingredient)
+      - can I replace [sugar](ingredient)
+      - what instead of [olive oil](ingredient)
+      - substitute [cream](ingredient)
+      - replace [chicken](ingredient) with what
+      - alternatives for [nuts](ingredient)
+
+  # ===== Clarification =====
+  - intent: ask_definition
+    examples: |
+      - what is a [whisk](search_term)
+      - what's a [ramekin](search_term)
+      - what does [sauté](search_term) mean
+      - define [braise](search_term)
+      - what is an [immersion blender](search_term)
+      - explain [folding](search_term)
+      - what's [julienne](search_term)
+      - meaning of [blanch](search_term)
+      - what is [zest](search_term)
+
+  # ===== Procedure Questions =====
+  - intent: ask_how_to
+    examples: |
+      - how do I [knead dough](search_term)
+      - how to [chop onions](search_term)
+      - how should I [mix](search_term)
+      - how do I [fold](search_term)
+      - how to [sauté](search_term)
+      - how do I do that
+      - how should I do this
+      - show me how to do that
+      - how do I [grate cheese](search_term)
+      - how to [whisk eggs](search_term)
+
+  # ===== General =====
+  - intent: greet
+    examples: |
+      - hi
+      - hello
+      - hey
+      - good morning
+      - good evening
+      - hi there
+      - hello there
+      - greetings
+
+  - intent: goodbye
+    examples: |
+      - bye
+      - goodbye
+      - see you
+      - talk to you later
+      - exit
+      - quit
+      - I'm done
+      - that's all
+
+  - intent: affirm
+    examples: |
+      - yes
+      - yeah
+      - sure
+      - of course
+      - that works
+      - sounds good
+      - yep
+      - correct
+      - right
+      - okay
+
+  - intent: deny
+    examples: |
+      - no
+      - nope
+      - not really
+      - I don't think so
+      - no thanks
+      - nah
+
+  - intent: thank
+    examples: |
+      - thanks
+      - thank you
+      - thanks a lot
+      - thank you very much
+      - appreciate it
+      - thanks so much

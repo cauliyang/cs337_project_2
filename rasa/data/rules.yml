@@ -1,0 +1,75 @@
+version: "3.1"
+
+rules:
+  - rule: greet user
+    steps:
+      - intent: greet
+      - action: utter_greet
+
+  - rule: say goodbye
+    steps:
+      - intent: goodbye
+      - action: utter_goodbye
+
+  - rule: thank user
+    steps:
+      - intent: thank
+      - action: utter_thank
+
+  - rule: show ingredients
+    steps:
+      - intent: show_ingredients
+      - action: action_show_ingredients
+
+  - rule: show steps
+    steps:
+      - intent: show_steps
+      - action: action_show_steps
+
+  - rule: next step
+    steps:
+      - intent: navigate_next
+      - action: action_navigate_next
+      - action: action_update_context
+
+  - rule: previous step
+    steps:
+      - intent: navigate_previous
+      - action: action_navigate_previous
+      - action: action_update_context
+
+  - rule: first step
+    steps:
+      - intent: navigate_first
+      - action: action_navigate_first
+      - action: action_update_context
+
+  - rule: answer quantity
+    steps:
+      - intent: ask_quantity
+      - action: action_answer_quantity
+
+  - rule: answer temperature
+    steps:
+      - intent: ask_temperature
+      - action: action_answer_temperature
+
+  - rule: answer time
+    steps:
+      - intent: ask_time
+      - action: action_answer_time
+
+  - rule: repeat current step
+    steps:
+      - intent: repeat_step
+      - action: action_show_current_step
+
+  - rule: submit recipe URL form
+    condition:
+      - active_loop: recipe_url_form
+    steps:
+      - action: recipe_url_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: action_fetch_recipe

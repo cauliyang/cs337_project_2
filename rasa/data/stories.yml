@@ -1,0 +1,97 @@
+version: "3.1"
+
+stories:
+  - story: full recipe walkthrough
+    steps:
+      - intent: greet
+      - action: utter_greet
+      - intent: provide_recipe_url
+      - action: action_fetch_recipe
+      - intent: show_steps
+      - action: action_show_steps
+      - intent: navigate_next
+      - action: action_navigate_next
+      - action: action_update_context
+      - intent: ask_how_to
+      - action: action_external_search
+      - intent: navigate_next
+      - action: action_navigate_next
+      - action: action_update_context
+
+  - story: check ingredients then start cooking
+    steps:
+      - intent: provide_recipe_url
+      - action: action_fetch_recipe
+      - intent: show_ingredients
+      - action: action_show_ingredients
+      - intent: show_steps
+      - action: action_show_steps
+      - intent: navigate_next
+      - action: action_navigate_next
+      - action: action_update_context
+
+  - story: step with temperature question
+    steps:
+      - intent: navigate_next
+      - action: action_navigate_next
+      - action: action_update_context
+      - intent: ask_temperature
+      - action: action_answer_temperature
+
+  - story: step with time question
+    steps:
+      - intent: navigate_next
+      - action: action_navigate_next
+      - action: action_update_context
+      - intent: ask_time
+      - action: action_answer_time
+
+  - story: vague how-to question with context
+    steps:
+      - action: action_show_current_step
+      - action: action_update_context
+      - intent: ask_how_to
+      - action: action_external_search
+
+  - story: ingredient quantity query
+    steps:
+      - intent: show_ingredients
+      - action: action_show_ingredients
+      - intent: ask_quantity
+      - action: action_answer_quantity
+
+  - story: substitution query
+    steps:
+      - intent: ask_substitution
+      - action: action_answer_substitution
+
+  - story: navigation back and forth
+    steps:
+      - intent: navigate_next
+      - action: action_navigate_next
+      - action: action_update_context
+      - intent: navigate_previous
+      - action: action_navigate_previous
+      - action: action_update_context
+      - intent: repeat_step
+      - action: action_show_current_step
+
+  - story: jump to specific step
+    steps:
+      - intent: navigate_specific
+      - action: action_navigate_specific
+      - action: action_update_context
+
+  - story: definition question
+    steps:
+      - intent: ask_definition
+      - action: action_external_search
+
+  - story: polite conversation
+    steps:
+      - intent: greet
+      - action: utter_greet
+      - intent: thank
+      - action: utter_thank
+      - intent: goodbye
+      - action: utter_goodbye

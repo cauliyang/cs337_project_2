@@ -52,30 +52,3 @@ class Recipe(BaseModel):
 class Query(BaseModel):
     description: str = Field(..., description="The input query")
     query_type: Literal["Action", "Object", "Modifier", "Context"] = Field(..., description="The type of the query")
-
-
-class Visitor:
-    def __init__(self, recipe: Recipe):
-        self.recipe = recipe
-        self.current_step = 0
-
-    def show_ingredients(self):
-        pass
-
-    def show_directions(self):
-        pass
-
-    def show_current_step(self):
-        pass
-
-    def move_to_next_step(self):
-        self.current_step += 1
-        self.show_current_step()
-
-    def move_to_previous_step(self):
-        self.current_step -= 1
-        self.show_current_step()
-
-    def show_recipe(self):
-        self.show_ingredients()
-        self.show_directions()

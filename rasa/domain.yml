@@ -1,0 +1,142 @@
+version: "3.1"
+
+intents:
+  # Recipe retrieval
+  - provide_recipe_url
+  - show_ingredients
+  - show_steps
+  - show_full_recipe
+
+  # Navigation
+  - navigate_next
+  - navigate_previous
+  - navigate_first
+  - navigate_specific
+  - repeat_step
+
+  # Step parameter queries
+  - ask_temperature
+  - ask_time
+  - ask_quantity
+  - ask_substitution
+
+  # Clarification
+  - ask_definition
+
+  # Procedure
+  - ask_how_to
+
+  # General
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - thank
+
+entities:
+  - ingredient
+  - tool
+  - step_number
+  - search_term
+
+slots:
+  recipe_url:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: recipe_url_form
+          - requested_slot: recipe_url
+
+  recipe_title:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  current_step:
+    type: float
+    initial_value: 0
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  total_steps:
+    type: float
+    initial_value: 0
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  recipe_data:
+    type: any
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  last_mentioned_ingredient:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  last_action:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  last_tool:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+responses:
+  utter_greet:
+    - text: "Hi! I'm your recipe assistant. Please provide a recipe URL to get started."
+    - text: "Hello! I can help you cook. Share a recipe URL with me!"
+
+  utter_ask_recipe_url:
+    - text: "Sure. Please specify a recipe URL."
+    - text: "What's the recipe URL you'd like to work with?"
+
+  utter_goodbye:
+    - text: "Happy cooking! Come back if you need help with another recipe."
+    - text: "Goodbye! Enjoy your meal!"
+
+  utter_default:
+    - text: "I'm not sure I understand. Can you rephrase that?"
+    - text: "Could you say that differently? I didn't quite catch that."
+
+  utter_thank:
+    - text: "You're welcome!"
+    - text: "Happy to help!"
+    - text: "No problem!"
+
+actions:
+  - action_fetch_recipe
+  - action_show_ingredients
+  - action_show_steps
+  - action_show_current_step
+  - action_navigate_next
+  - action_navigate_previous
+  - action_navigate_first
+  - action_navigate_specific
+  - action_answer_temperature
+  - action_answer_time
+  - action_answer_quantity
+  - action_answer_substitution
+  - action_external_search
+  - action_update_context
+  - validate_recipe_url_form
+
+forms:
+  recipe_url_form:
+    required_slots:
+      - recipe_url
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true

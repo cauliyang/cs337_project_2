@@ -9,10 +9,10 @@ class SearchResult(BaseModel):
     title: str = Field(..., description="The title of searching item")
     url: str = Field(..., description="The url of searching item")
     source: str = Field(..., description="Where the searching item is searched")
-    id: str | None = Field(None, description="The id of searching item")
-    duration: int | None = Field(None, description="The duration of searching item")
-    view_count: int | None = Field(None, description="The view count of searching item")
-    reponse: dict[str, str] | None = Field(None, description="The response of searching item")
+    id: str | None = Field(default=None, description="The id of searching item")
+    duration: int | None = Field(default=None, description="The duration of searching item")
+    view_count: int | None = Field(default=None, description="The view count of searching item")
+    reponse: dict[str, str] | None = Field(default=None, description="The response of searching item")
 
 
 def search_youtube(query, max_results=5):
@@ -111,12 +111,42 @@ def search_duckduckgo(
     """
     match search_type:
         case "text":
-            results = DDGS().text(query, region=region, max_results=max_results)
+            return [
+                SearchResult(
+                    title=result["title"],
+                    url=result["href"],
+                    source="DDG",
+                    reponse=result,
+                )
+                for result in DDGS().text(query, region=region, max_results=max_results)
+            ]
         case "news":
-            results = DDGS().news(query, region=region, max_results=max_results)
+            return [
+                SearchResult(
+                    title=result["title"],
+                    url=result["url"],
+                    source="DDG",
+                    reponse=result,
+                )
+                for result in DDGS().news(query, region=region, max_results=max_results)
+            ]
         case "images":
-            results = DDGS().images(query, region=region, max_results=max_results)
+            return [
+                SearchResult(
+                    title=result["title"],
+                    url=result["image"],
+                    source="DDG",
+                    reponse=result,
+                )
+                for result in DDGS().images(query, region=region, max_results=max_results)
+            ]
         case "videos":
-            results = DDGS().videos(query, region=region, max_results=max_results)
-
-    return results
+            return [
+                SearchResult(
+                    title=result["title"],
+                    url=result["content"],
+                    source="DDG",
+                    reponse=result,
+                )
+                for result in DDGS().videos(query, region=region, max_results=max_results)
+            ]

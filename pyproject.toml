@@ -11,8 +11,6 @@ license = { text = "MIT" }
 dependencies = [
   "ftfy>=6.3.1",
   "nltk>=3.9.2",
-  "spacy>=3.8.7",
-  "typer",
   "unidecode>=1.4.0",
   "thefuzz>=0.22.1",
   "requests>=2.32.5",
@@ -23,7 +21,7 @@ dependencies = [
   "yt-dlp>=2025.11.12",
   "ddgs>=9.9.1",
   "pydantic<1.10.10",
-  "rasa>=3.6.0,<3.7.0",
+  "rasa>=3.6.21",
   "sqlalchemy<2.0",
   "number-parser>=0.3.2",
   "packaging<22.0",
@@ -46,7 +44,6 @@ bugs = "https://github.com/cauliyang/cs337_project_2/issues"
 homepage = "https://github.com/cauliyang/cs337_project_2"
 
 [project.scripts]
-recipebot = "recipebot.__main__:app"
 
 [tool.setuptools.packages.find]
 where = ["."] # Current directory

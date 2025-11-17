@@ -6,7 +6,7 @@ from recipebot.model import Recipe
 from .step import parse_steps_from_directions
 
 
-def parse_recipe(url: str) -> Recipe:
+def parse_recipe(url: str, split_by_atomic_steps: bool = True) -> Recipe:
     """Fetch and parse recipe from URL.
 
     Returns:
@@ -23,7 +23,7 @@ def parse_recipe(url: str) -> Recipe:
 
     title = extract_title_from_url(url)
     # Parse steps with full metadata
-    steps = parse_steps_from_directions(directions, ingredients)
+    steps = parse_steps_from_directions(directions, ingredients, split_by_atomic_steps=split_by_atomic_steps)
 
     # Create Recipe object
     recipe = Recipe(

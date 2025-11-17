@@ -314,39 +314,3 @@ def parse_steps_from_directions(
             step_number += 1
 
     return steps
-
-
-if __name__ == "__main__":
-    from rich import print
-
-    # Test examples
-    test_directions = [
-        "Preheat oven to 350 degrees F (175 degrees C).",
-        "In a large bowl, whisk together the flour, sugar, and salt.",
-        "Sauté the onions in a pan over medium heat for 5-7 minutes, stirring occasionally, until golden brown.",
-        "Bake for 30 minutes or until golden. Let cool before serving.",
-        "Be careful not to overmix the batter.",
-        "You can substitute butter for oil if desired.",
-    ]
-    # Mock ingredients
-    mock_ingredients = [
-        Ingredient(name="flour", quantity="2", unit="cups"),
-        Ingredient(name="sugar", quantity="1", unit="cup"),
-        Ingredient(name="salt", quantity="1", unit="teaspoon"),
-        Ingredient(name="onions", quantity="2", unit=None),
-        Ingredient(name="butter", quantity="1/2", unit="cup"),
-    ]
-
-    print("Step Parsing Tests:")
-    print("=" * 80)
-
-    steps = parse_steps_from_directions(test_directions, mock_ingredients)
-
-    for step in steps:
-        print(f"\nStep {step.step_number}: {step.description}")
-        print(f"  Ingredients: {[ing.name for ing in step.ingredients]}")
-        print(f"  Tools: {step.tools}")
-        print(f"  Methods: {step.methods}")
-        print(f"  Time: {step.time}")
-        print(f"  Temperature: {step.temperature}")
-        print(f"  Actionable: {step.actionable}, Prepared: {step.is_prepared}")

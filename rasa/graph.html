@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Rasa Core Visualisation</title>
+    <script src="https://dagrejs.github.io/project/dagre-d3/latest/dagre-d3.min.js"></script>
+    <script src="https://dagrejs.github.io/project/dagre/latest/dagre.min.js"></script>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://dagrejs.github.io/project/graphlib-dot/v0.6.3/graphlib-dot.js"></script>
+</head>
+<body>
+<div id="errormsg" style="color: #b00"></div>
+<svg>
+    <style id="graph-style">
+        .node.invisible > rect {
+            display: none;
+        }
+
+        .node.start > rect {
+            fill: #7f7;
+            rx: 30;
+            ry: 18;
+        }
+
+        .node.end > rect {
+            fill: #f77;
+            rx: 30;
+            ry: 18;
+        }
+
+        .node:not(.active) > rect, .node:not(.active) > .label {
+            opacity: 0.4;
+        }
+
+        .edgePath:not(.active) path {
+            opacity: 0.4;
+        }
+
+        .node.ellipsis > rect {
+            fill: #CCC;
+        }
+
+        .node.intent > rect {
+            fill: #7ff;
+        }
+
+        .node.dashed > rect {
+            stroke-dasharray: 5;
+        }
+
+        text {
+            font-weight: 300;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serf, serif;
+            font-size: 14px;
+            color: #1f1d1d;
+        }
+
+        .node rect {
+            stroke: #444;
+            fill: #fff;
+            stroke-width: 1.5px;
+        }
+
+        .edgePath path {
+            stroke: #333;
+            stroke-width: 1.5px;
+        }
+
+        svg {
+            position: fixed;
+            top: 10px;
+            left: 0;
+            height: 100%;
+            width: 100%
+        }
+    </style>
+    <g></g>
+</svg>
+<script>
+
+  function serveGraph() {
+    let oldInputGraphValue;
+
+    const url = 'visualization.dot';
+    const refreshInterval = 500;
+
+    // trigger a refresh by fetching an updated graph
+    setInterval(function () {
+      fetch(url).then(r => r.text()).then(dot => {
+        document.getElementById('errormsg').innerHTML = '';
+        if (oldInputGraphValue === dot) return;
+
+        oldInputGraphValue = dot;
+        drawGraph(dot);
+      }).catch(err => {
+        document.getElementById('errormsg').innerHTML =
+          'Failed to update plot. (' + err.message + ')';
+      });
+    }, refreshInterval);
+  }
+
+  function drawGraph(graph) {
+    let g = graphlibDot.read(graph);
+    // Set margins, if not present
+    if (!g.graph().hasOwnProperty("marginx") &&
+      !g.graph().hasOwnProperty("marginy")) {
+      g.graph().marginx = 20;
+      g.graph().marginy = 20;
+    }
+    g.graph().transition = function (selection) {
+      return selection.transition().duration(300);
+    };
+    // Render the graph into svg g
+    d3.select("svg g").call(render, g);
+  }
+  // Set up zoom support
+  const svg = d3.select("svg"),
+    inner = d3.select("svg g"),
+    zoom = d3.zoom().on("zoom", function () {
+      inner.attr("transform", d3.event.transform);
+    });
+  svg.call(zoom);
+
+  // Create and configure the renderer
+  const render = dagreD3.render();
+
+  let isClient = false;
+  isClient = true;
+
+  if (isClient) {
+    // Mark all nodes and their edges as active
+    cssRules = document.getElementById('graph-style').sheet.cssRules;
+    cssRules[3].style.opacity = 1;
+    cssRules[4].style.opacity = 1;
+
+    let graph;
+    graph = `digraph  {
+0 [class="start active", fillcolor=green, fontsize=12, label=START, style=filled];
+"-1" [class=end, fillcolor=red, fontsize=12, label=END, style=filled];
+1 [class="", fontsize=12, label=utter_greet];
+2 [class="", fontsize=12, label=action_fetch_recipe];
+3 [class="", fontsize=12, label=action_show_steps];
+4 [class="", fontsize=12, label=action_navigate_next];
+5 [class="", fontsize=12, label=action_update_context];
+6 [class="", fontsize=12, label=action_external_search];
+9 [class="", fontsize=12, label=action_fetch_recipe];
+10 [class="", fontsize=12, label=action_show_ingredients];
+16 [class="", fontsize=12, label=action_answer_temperature];
+19 [class="", fontsize=12, label=action_answer_time];
+20 [class="", fontsize=12, label=action_show_current_step];
+21 [class="", fontsize=12, label=action_update_context];
+22 [class="", fontsize=12, label=action_external_search];
+23 [class="", fontsize=12, label=action_show_ingredients];
+24 [class="", fontsize=12, label=action_answer_quantity];
+25 [class="", fontsize=12, label=action_answer_substitution];
+28 [class="", fontsize=12, label=action_navigate_previous];
+29 [class="", fontsize=12, label=action_update_context];
+30 [class="", fontsize=12, label=action_show_current_step];
+31 [class="", fontsize=12, label=action_navigate_specific];
+32 [class="", fontsize=12, label=action_update_context];
+35 [class="", fontsize=12, label=utter_thank];
+36 [class="", fontsize=12, label=utter_goodbye];
+37 [class="", fontsize=12, label="..."];
+38 [class="", fontsize=12, label=recipe_url_form];
+39 [class="", fontsize=12, label=action_fetch_recipe];
+41 [class="", fontsize=12, label=utter_greet];
+45 [class="", fontsize=12, label=utter_thank];
+47 [class="", fontsize=12, label=action_show_ingredients];
+49 [class="", fontsize=12, label=action_show_steps];
+57 [class="", fontsize=12, label=action_navigate_first];
+61 [class=intent, fillcolor=lightblue, label=hi, shape=rect, style=filled];
+62 [class=intent, fillcolor=lightblue, label="https://www.allrecipes.com/recipe/218091/classic-and-simple-meat-lasagna/", shape=rect, style=filled];
+63 [class=intent, fillcolor=lightblue, label="I need to know the ingredients", shape=rect, style=filled];
+64 [class=intent, fillcolor=lightblue, label="can I replace sugar", shape=rect, style=filled];
+65 [class=intent, fillcolor=lightblue, label="show me step 3", shape=rect, style=filled];
+66 [class=intent, fillcolor=lightblue, label="next step", shape=rect, style=filled];
+67 [class=intent, fillcolor=lightblue, label="define braise", shape=rect, style=filled];
+68 [class=intent, fillcolor=lightblue, label="https://www.seriouseats.com/easy-bolognese-recipe", shape=rect, style=filled];
+69 [class=intent, fillcolor=lightblue, label="thanks so much", shape=rect, style=filled];
+70 [class=intent, fillcolor=lightblue, label="what are the steps", shape=rect, style=filled];
+71 [class=intent, fillcolor=lightblue, label="go on", shape=rect, style=filled];
+72 [class=intent, fillcolor=lightblue, label="how to chop onions", shape=rect, style=filled];
+73 [class=intent, fillcolor=lightblue, label="at what temperature do I cook this", shape=rect, style=filled];
+74 [class=intent, fillcolor=lightblue, label="how many minutes", shape=rect, style=filled];
+75 [class=intent, fillcolor=lightblue, label=rewind, shape=rect, style=filled];
+76 [class=intent, fillcolor=lightblue, label="go on", shape=rect, style=filled];
+77 [class=intent, fillcolor=lightblue, label="show the ingredients list", shape=rect, style=filled];
+78 [class=intent, fillcolor=lightblue, label="how do I make this", shape=rect, style=filled];
+79 [class=intent, fillcolor=lightblue, label="how do I fold", shape=rect, style=filled];
+80 [class=intent, fillcolor=lightblue, label="how many eggs", shape=rect, style=filled];
+81 [class=intent, fillcolor=lightblue, label="say that again", shape=rect, style=filled];
+82 [class=intent, fillcolor=lightblue, label=quit, shape=rect, style=filled];
+83 [class=intent, fillcolor=lightblue, label="good evening", shape=rect, style=filled];
+84 [class=intent, fillcolor=lightblue, label=exit, shape=rect, style=filled];
+85 [class=intent, fillcolor=lightblue, label="thank you very much", shape=rect, style=filled];
+86 [class=intent, fillcolor=lightblue, label="what do I need for this recipe", shape=rect, style=filled];
+87 [class=intent, fillcolor=lightblue, label="take me through the recipe", shape=rect, style=filled];
+88 [class=intent, fillcolor=lightblue, label="what do I do next", shape=rect, style=filled];
+89 [class=intent, fillcolor=lightblue, label="go back one step", shape=rect, style=filled];
+90 [class=intent, fillcolor=lightblue, label="start over", shape=rect, style=filled];
+91 [class=intent, fillcolor=lightblue, label="say it again", shape=rect, style=filled];
+0 -> 20  [class="", key=NONE, label=""];
+0 -> 37  [class="", key=NONE, label=""];
+0 -> 61  [class="", key=0];
+0 -> 62  [class="", key=0];
+0 -> 63  [class="", key=0];
+0 -> 64  [class="", key=0];
+0 -> 65  [class="", key=0];
+0 -> 66  [class="", key=0];
+0 -> 67  [class="", key=0];
+1 -> 68  [class="", key=0];
+1 -> 69  [class="", key=0];
+2 -> 70  [class="", key=0];
+3 -> 71  [class="", key=0];
+4 -> 5  [class="", key=NONE, label=""];
+5 -> "-1"  [class="", key=NONE, label=""];
+5 -> 72  [class="", key=0];
+5 -> 73  [class="", key=0];
+5 -> 74  [class="", key=0];
+5 -> 75  [class="", key=0];
+6 -> 76  [class="", key=0];
+9 -> 77  [class="", key=0];
+10 -> 78  [class="", key=0];
+16 -> "-1"  [class="", key=NONE, label=""];
+19 -> "-1"  [class="", key=NONE, label=""];
+20 -> 21  [class="", key=NONE, label=""];
+21 -> 79  [class="", key=0];
+22 -> "-1"  [class="", key=NONE, label=""];
+23 -> 80  [class="", key=0];
+24 -> "-1"  [class="", key=NONE, label=""];
+25 -> "-1"  [class="", key=NONE, label=""];
+28 -> 29  [class="", key=NONE, label=""];
+29 -> "-1"  [class="", key=NONE, label=""];
+29 -> 81  [class="", key=0];
+30 -> "-1"  [class="", key=NONE, label=""];
+31 -> 32  [class="", key=NONE, label=""];
+32 -> "-1"  [class="", key=NONE, label=""];
+35 -> 82  [class="", key=0];
+36 -> "-1"  [class="", key=NONE, label=""];
+37 -> 38  [class="", key=NONE, label=""];
+37 -> 83  [class="", key=0];
+37 -> 84  [class="", key=0];
+37 -> 85  [class="", key=0];
+37 -> 86  [class="", key=0];
+37 -> 87  [class="", key=0];
+37 -> 88  [class="", key=0];
+37 -> 89  [class="", key=0];
+37 -> 90  [class="", key=0];
+37 -> 91  [class="", key=0];
+38 -> 39  [class="", key=NONE, label=""];
+39 -> "-1"  [class="", key=NONE, label=""];
+41 -> "-1"  [class="", key=NONE, label=""];
+45 -> "-1"  [class="", key=NONE, label=""];
+47 -> "-1"  [class="", key=NONE, label=""];
+49 -> "-1"  [class="", key=NONE, label=""];
+57 -> 32  [class="", key=NONE, label=""];
+61 -> 1  [class="", key=0];
+62 -> 9  [class="", key=0];
+63 -> 23  [class="", key=0];
+64 -> 25  [class="", key=0];
+65 -> 31  [class="", key=0];
+66 -> 4  [class="", key=0];
+67 -> 22  [class="", key=0];
+68 -> 2  [class="", key=0];
+69 -> 35  [class="", key=0];
+70 -> 3  [class="", key=0];
+71 -> 4  [class="", key=0];
+72 -> 6  [class="", key=0];
+73 -> 16  [class="", key=0];
+74 -> 19  [class="", key=0];
+75 -> 28  [class="", key=0];
+76 -> 4  [class="", key=0];
+77 -> 10  [class="", key=0];
+78 -> 3  [class="", key=0];
+79 -> 22  [class="", key=0];
+80 -> 24  [class="", key=0];
+81 -> 30  [class="", key=0];
+82 -> 36  [class="", key=0];
+83 -> 41  [class="", key=0];
+84 -> 36  [class="", key=0];
+85 -> 45  [class="", key=0];
+86 -> 47  [class="", key=0];
+87 -> 49  [class="", key=0];
+88 -> 4  [class="", key=0];
+89 -> 28  [class="", key=0];
+90 -> 57  [class="", key=0];
+91 -> 30  [class="", key=0];
+}
+`;
+    drawGraph(graph);
+  } else {
+    serveGraph();
+  }
+
+
+</script>
+</body>
+</html>
