@@ -81,6 +81,17 @@ uv add requests
 make lint
 ```
 
+## Problem Cases to Fix
+
+recipe url: https://www.allrecipes.com/recipe/20096/cheesy-ham-and-hash-brown-casserole/
+wrong hour parsing in step 7:
+
+```
+Bake in the preheated oven until bubbly and lightly brown, about 1 hour.
+⏱️  Time: 1 minutes
+🔧 Tools: oven
+```
+
 ## Project Description
 
 - Free software: MIT License
