@@ -1,7 +1,6 @@
-from __future__ import annotations
-
-from dataclasses import dataclass
 from enum import Enum
+
+from pydantic import BaseModel
 
 from recipebot.model import Query
 
@@ -90,8 +89,7 @@ _CATEGORY_PATTERNS: dict[QuestionCategory, tuple[str, ...]] = {
 }
 
 
-@dataclass
-class ClassifiedQuestion:
+class ClassifiedQuestion(BaseModel):
     """Simple container for classifier output."""
 
     category: QuestionCategory

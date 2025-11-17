@@ -25,6 +25,8 @@ dependencies = [
   "rich>=14.2.0",
   "types-requests>=2.32.4.20250913",
   "python-dotenv>=1.2.1",
+  "yt-dlp>=2025.11.12",
+  "ddgs>=9.9.1",
 ]
 requires-python = ">= 3.10"
 

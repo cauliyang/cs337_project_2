@@ -11,8 +11,40 @@ class Ingredient(BaseModel):
     misc: str | None = Field(default=None, description="Any additional information about the ingredient")
 
 
+# {
+#     "step_number": int,
+#     "description": str,
+#     "ingredients": [list of ingredient names],
+#     "tools": [list of tools],
+#     "methods": [list of methods],
+#     "time": {
+#         "duration": str or dict of sub-times,
+#     },
+#     "temperature": {
+#         "oven": str (optional),
+#         "<ingredient>": str (optional)
+#     }
+# }
+
+
+class Step(BaseModel):
+    step_number: int = Field(..., description="The step number")
+    description: str = Field(..., description="The description of the step")
+    ingredients: list[Ingredient] = Field(..., description="The ingredients used in the step")
+
+    tools: list[str] = Field(..., description="The tools used in the step")
+    methods: list[str] = Field(..., description="The methods used in the step")
+    time: dict[str, int] = Field(..., description="The time required for the step")
+    temperature: dict[str, str] = Field(..., description="The temperature required for the step")
+
+    actionable: bool = Field(..., description="Whether the method is actionable or advices")
+    is_prepared: bool = Field(..., description="Whether the step is use to preapre soemthing for next step")
+    next_step: "Step" = Field(None, description="Next step in the recipe")
+    prev_setp: "Step" = Field(None, description="Previous step in the recipe")
+
+
 class Direction(BaseModel):
-    step: int = Field(..., description="The step number of the direction")
+    step_number: int = Field(..., description="The step number of the direction")
     description: str = Field(..., description="The description of the direction")
     ingredients: list[Ingredient] = Field(..., description="The ingredients used in the direction")
     tools: list[str] = Field(..., description="The tools used in the direction")
