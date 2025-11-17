@@ -236,21 +236,3 @@ def get_tools_by_category(category: str) -> set[str]:
         Set of tools in that category
     """
     return TOOLS_DATABASE.get(category, set())
-
-
-if __name__ == "__main__":
-    # Test examples
-    test_cases = [
-        "Preheat the oven to 375 degrees F (190 degrees C).",
-        "Make the sauce: Heat oil in a large saucepan over medium-high heat. Add onion and garlic; cook and stir until translucent, about 5 minutes. Add ground beef and garlic powder; cook and stir until browned and crumbly, 5 to 7 minutes. Drain and discard grease.  Add spaghetti sauce, tomato sauce, and oregano; cover and simmer for 15 to 20 minutes.",  # noqa: E501
-        "Make the lasagna: Mix mozzarella and provolone together in a medium bowl. Mix ricotta, milk, eggs, and oregano together in another bowl.",  # noqa: E501
-        "Ladle sauce (just enough to cover) into the bottom of a 9x13-inch baking dish.  Layer sauce with three lasagna noodles, more sauce, ricotta mixture, and mozzarella mixture; repeat once more using all of remaining cheese mixtures. Layer with remaining three lasagna noodles and remaining sauce, then sprinkle Parmesan over top.",  # noqa: E501
-        "Cover and bake in the preheated oven for 30 minutes. Uncover and continue to bake until cheese is melted and top is golden, about 15 minutes longer.",  # noqa: E501
-    ]
-
-    print("Tool Extraction Tests:")
-    print("=" * 60)
-    for test in test_cases:
-        tools = extract_tools_from_text(test)
-        print(f"\nText: {test}")
-        print(f"Tools: {', '.join(tools) if tools else 'None'}")

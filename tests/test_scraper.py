@@ -7,14 +7,6 @@ from recipebot.parser import parse_steps_from_directions
 console = Console()
 
 
-@pytest.fixture
-def urls():
-    return [
-        "https://www.allrecipes.com/recipe/24074/alysias-basic-meat-lasagna/",
-        "https://www.allrecipes.com/recipe/218091/classic-and-simple-meat-lasagna/",
-    ]
-
-
 @pytest.mark.skip(reason="This test is for reference only. It uses the recipe-scrapers library.")
 def test_scraper_by_recipe(urls):
     from recipe_scrapers import scrape_me

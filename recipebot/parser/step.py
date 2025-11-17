@@ -3,9 +3,10 @@
 import re
 from typing import Literal
 
-from recipebot.methods import extract_methods_from_text
 from recipebot.model import Ingredient, Step
-from recipebot.tools import extract_tools_from_text
+
+from .methods import extract_methods_from_text
+from .tools import extract_tools_from_text
 
 # Regular expressions for time extraction
 TIME_PATTERNS = [

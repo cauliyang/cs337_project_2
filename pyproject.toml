@@ -10,13 +10,10 @@ classifiers = [
 license = { text = "MIT" }
 dependencies = [
   "ftfy>=6.3.1",
-  "inflection>=0.5.1",
-  "langdetect>=1.0.9",
   "nltk>=3.9.2",
   "spacy>=3.8.7",
   "typer",
   "unidecode>=1.4.0",
-  "en-core-web-md @ https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.8.0/en_core_web_md-3.8.0-py3-none-any.whl",
   "thefuzz>=0.22.1",
   "requests>=2.32.5",
   "beautifulsoup4>=4.14.2",
@@ -26,8 +23,10 @@ dependencies = [
   "yt-dlp>=2025.11.12",
   "ddgs>=9.9.1",
   "pydantic<1.10.10",
-  "rasa>=3.6.0",
+  "rasa>=3.6.0,<3.7.0",
+  "sqlalchemy<2.0",
   "number-parser>=0.3.2",
+  "packaging<22.0",
 ]
 requires-python = ">= 3.10"
 
