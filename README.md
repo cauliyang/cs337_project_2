@@ -81,6 +81,15 @@ uv add requests
 make lint
 ```
 
+## TODO
+
+- [ ] make chatbot answer which tool is used in the step instead of searching the web
+- [ ] make chatbot answer which ingredient is used in the step instead of searching the web
+- [ ] make chatbot answer which method is used in the step instead of searching the web
+- [ ] make chatbot answer which time is used in the step instead of searching the web
+- [ ] add voice support
+- [ ] add slack integration
+
 ## Problem Cases to Fix
 
 recipe url: https://www.allrecipes.com/recipe/20096/cheesy-ham-and-hash-brown-casserole/
