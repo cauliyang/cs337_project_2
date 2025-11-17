@@ -1,4 +1,4 @@
-from . import crawler, model, parser, query, search
+from . import crawler, methods, model, parser, query, search, tools
 
 __all__ = [
     "model",
@@ -6,4 +6,7 @@ __all__ = [
     "crawler",
     "parser",
     "query",
+    "parser",
+    "tools",
+    "methods",
 ]

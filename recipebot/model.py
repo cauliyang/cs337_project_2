@@ -30,19 +30,16 @@ class Ingredient(BaseModel):
 class Step(BaseModel):
     step_number: int = Field(..., description="The step number")
     description: str = Field(..., description="The description of the step")
-    ingredients: list[Ingredient] = Field(..., description="The ingredients used in the step")
-
-    tools: list[str] = Field(..., description="The tools used in the step")
-    methods: list[str] = Field(..., description="The methods used in the step")
-    time: dict[str, int] = Field(..., description="The time required for the step")
-    temperature: dict[str, str] = Field(..., description="The temperature required for the step")
-
-    actionable: bool = Field(..., description="Whether the method is actionable or advices")
-    is_prepared: bool = Field(..., description="Whether the step is use to preapre soemthing for next step")
-
-
-def parse_steps_from_directions(directions: list[str]) -> list[Step]:
-    pass
+    ingredients: list[Ingredient] = Field(default_factory=list, description="The ingredients used in the step")
+    tools: list[str] = Field(default_factory=list, description="The tools used in the step")
+    methods: list[str] = Field(default_factory=list, description="The methods used in the step")
+    time: dict[str, str | int] = Field(default_factory=dict, description="The time required for the step")
+    temperature: dict[str, str] = Field(default_factory=dict, description="The temperature required for the step")
+    actionable: bool = Field(default=True, description="Whether the method is actionable or advices")
+    is_prepared: bool = Field(default=False, description="Whether the step is use to prepare something for next step")
+    info_type: Literal["warning", "advice", "observation"] | None = Field(
+        default=None, description="The type of the step"
+    )
 
 
 class Recipe(BaseModel):
