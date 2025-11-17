@@ -70,8 +70,7 @@ def search_duckduckgo(
             {
             'title': 'How to Make Salad: Recipes, Tips and More | Taste of Home',
             'image':
-    'https://www.tasteofhome.com/wp-content/uploads/2018/01/exps178590_TH143194D06_19_6
-    b-2.jpg?fit=680,680',
+    'https://www.tasteofhome.com/wp-content/uploads/2018/01/exps178590_TH143194D06_19_6b-2.jpg?fit=680,680',
             'thumbnail':
     'https://tse4.mm.bing.net/th/id/OIP.amLkQpSN09YAPBN81LKHFwHaHa?pid=Api',
             'url': 'https://www.tasteofhome.com/article/how-to-make-salad/',
@@ -83,8 +82,7 @@ def search_duckduckgo(
             {
             'title': 'How to Make a Salad | Easy Salad Recipe | My Favorite Salad',
             'content':
-    'https://www.msn.com/en-us/foodanddrink/recipes/how-to-make-a-salad-easy-salad-reci
-    pe-my-favorite-salad/vi-AA1Oel7c',
+    'https://www.msn.com/en-us/foodanddrink/recipes/how-to-make-a-salad-easy-salad-recipe-my-favorite-salad/vi-AA1Oel7c',
             'description': 'In this episode of In the Kitchen with Matt I will show you
     how to make a salad. This easy salad recipe is my favorite salad to eat and I eat
     it all the time. Salads can be super healthy for you depending on what you put on

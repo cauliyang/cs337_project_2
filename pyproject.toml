@@ -27,6 +27,8 @@ dependencies = [
   "python-dotenv>=1.2.1",
   "yt-dlp>=2025.11.12",
   "ddgs>=9.9.1",
+  "recipe-scrapers>=15.10.0",
+  "number-parser>=0.3.2",
 ]
 requires-python = ">= 3.10"
 

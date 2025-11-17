@@ -5,7 +5,7 @@ from recipebot.search import search_duckduckgo, search_youtube
 
 def test_search_youtube():
     # Example usage
-    results = search_youtube("python tutorial", max_results=3)
+    results = search_youtube("how to make salad", max_results=3)
     for video in results:
         print(video)
 

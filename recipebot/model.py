@@ -39,28 +39,17 @@ class Step(BaseModel):
 
     actionable: bool = Field(..., description="Whether the method is actionable or advices")
     is_prepared: bool = Field(..., description="Whether the step is use to preapre soemthing for next step")
-    next_step: "Step" = Field(None, description="Next step in the recipe")
-    prev_setp: "Step" = Field(None, description="Previous step in the recipe")
 
 
-class Direction(BaseModel):
-    step_number: int = Field(..., description="The step number of the direction")
-    description: str = Field(..., description="The description of the direction")
-    ingredients: list[Ingredient] = Field(..., description="The ingredients used in the direction")
-    tools: list[str] = Field(..., description="The tools used in the direction")
-    methods: list[str] = Field(..., description="The methods used in the direction")
-    time: dict[str, int] = Field(..., description="The time required for the direction")
-    temperature: dict[str, str] = Field(..., description="The temperature required for the direction")
-
-    @classmethod
-    def from_parser(cls, parser, text: str) -> "Direction":
-        return parser.parse(text)
+def parse_steps_from_directions(directions: list[str]) -> list[Step]:
+    pass
 
 
 class Recipe(BaseModel):
     title: str = Field(..., description="The title of the recipe")
     ingredients: list[Ingredient] = Field(..., description="The ingredients of the recipe")
-    directions: list[Direction] = Field(..., description="The directions of the recipe")
+    directions: list[str] = Field(..., description="The directions of the recipe")
+    steps: list[Step] = Field(..., description="The steps parsed from directions of the recipe")
 
 
 class Query(BaseModel):
