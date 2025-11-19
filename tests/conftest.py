@@ -36,5 +36,5 @@ def ingredients():
 def urls():
     return [
         "https://www.allrecipes.com/recipe/24074/alysias-basic-meat-lasagna/",
-        "https://www.allrecipes.com/recipe/218091/classic-and-simple-meat-lasagna/",
+        "https://www.seriouseats.com/pecan-pie-cheesecake-recipe-11843450",
     ]

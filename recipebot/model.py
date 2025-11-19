@@ -4,12 +4,11 @@ from pydantic import BaseModel, Field
 
 
 class Ingredient(BaseModel):
-    name: str = Field(..., description="The name of the ingredient")
-    quantity: str = Field(..., description="The quantity of the ingredient")
-    unit: str | None = Field(default=None, description="The unit of the ingredient")
-    preparation: str | None = Field(default=None, description="The preparation of the ingredient")
-    misc: str | None = Field(default=None, description="Any additional information about the ingredient")
-
+    name: str | None = Field(default=None, description="The name of the ingredient")
+    quantity: str | None = Field(default=None, description="The quantity of the ingredient")
+    unit: str | None = None
+    preparation: str | None = None
+    misc: str | None = None
 
 # {
 #     "step_number": int,

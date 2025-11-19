@@ -81,32 +81,39 @@ def scrape_seriouseats(url):
     # Ingredients
     ingredients = []
     for item in soup.select(".structured-ingredients__list-item"):
-        i = Ingredient()
+        i = Ingredient(name=None, quantity=None, unit=None, preparation=None, misc=None)
+
         for span in item.select(
             "span[data-ingredient-quantity], span[data-ingredient-unit], span[data-ingredient-name], span[data-ingredient-preparation]"  # noqa: E501
         ):
+            text = span.get_text(strip=True)
+            if not text:
+                continue
             if span.has_attr("data-ingredient-quantity") and i.quantity is None:
-                i.quantity = span.get_text(strip=True)
+                i.quantity = text
             elif span.has_attr("data-ingredient-unit") and i.unit is None:
-                i.unit = span.get_text(strip=True)
+                i.unit = text
             elif span.has_attr("data-ingredient-name") and i.name is None:
-                i.name = span.get_text(strip=True)
+                i.name = text
             elif span.has_attr("data-ingredient-preparation") and i.preparation is None:
-                i.preparation = span.get_text(strip=True)
+                i.preparation = text
 
-        # Catch any remaining text or spans as "misc"
+        # Catch any remaining text as "misc"
         misc_parts = [
-            t.strip() for t in item.stripped_strings if t.strip() not in {i.quantity, i.unit, i.name, i.preparation}
+            t.strip()
+            for t in item.stripped_strings
+            if t.strip() not in {i.quantity, i.unit, i.name, i.preparation} and t.strip()
         ]
         if misc_parts:
             i.misc = " ".join(misc_parts)
 
-        ingredients.append(i)
+        # Skip ingredient if it has no name
+        if i.name:
+            ingredients.append(i)
 
     # Directions
     directions = []
     steps_section = soup.select_one("div#structured-project__steps_1-0")
-
     if steps_section:
         directions = [
             d.get_text(" ", strip=True)
