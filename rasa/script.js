@@ -113,3 +113,40 @@ fetch('http://localhost:5005/')
         console.error('❌ Cannot connect to Rasa:', error);
         addMessage("⚠️ Warning: Cannot connect to Rasa server. Please start:\n1. rasa run actions\n2. rasa run --enable-api --cors \"*\"", false);
     });
+
+
+
+
+
+const micButton = document.getElementById("micButton");
+
+let recognition;
+if ('webkitSpeechRecognition' in window) {
+    recognition = new webkitSpeechRecognition();
+} else if ('SpeechRecognition' in window) {
+    recognition = new SpeechRecognition();
+}
+
+if (recognition) {
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    micButton.onclick = () => {
+        recognition.start();
+    };
+
+    recognition.onresult = async (event) => {
+        const text = event.results[0][0].transcript;
+        console.log("STT heard:", text);
+
+        await sendMessage(text);
+    };
+
+    recognition.onerror = (err) => {
+        console.error("STT error:", err);
+    };
+} else {
+    console.error("SpeechRecognition API not supported in this browser.");
+}
+

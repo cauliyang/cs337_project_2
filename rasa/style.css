@@ -303,3 +303,28 @@ body {
         padding: 14px 18px;
     }
 }
+
+
+#micButton {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: #667eea;
+    color: white;
+    font-size: 32px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s, transform 0.2s;
+}
+
+#micButton:hover {
+    background: #5568d3;
+    transform: scale(1.05);
+}
+
+#micButton.active {
+    background: #ff4d4d;
+}
