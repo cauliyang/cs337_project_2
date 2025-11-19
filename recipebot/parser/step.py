@@ -26,12 +26,12 @@ TEMP_PATTERNS = [
 
 # Sentence splitting patterns
 SENTENCE_SPLITTERS = [
-    re.compile(r"\.\s+[A-Z]", flags=re.IGNORECASE),  # Period followed by capital letter
-    re.compile(r";\s*", flags=re.IGNORECASE),  # Semicolon
-    re.compile(r",\s+then\s+", flags=re.IGNORECASE),  # ", then "
-    re.compile(r",\s+and then\s+", flags=re.IGNORECASE),  # ", and then "
-    re.compile(r"\s+meanwhile\s+", flags=re.IGNORECASE),  # " meanwhile "
-    re.compile(r"\s+while\s+", flags=re.IGNORECASE),  # " while "
+    re.compile(r"\.\s+(?=[A-Z])", flags=re.IGNORECASE),       # Period followed by capital letter (lookahead)
+    re.compile(r";\s*", flags=re.IGNORECASE),                # Semicolon
+    re.compile(r",\s+then\s+", flags=re.IGNORECASE),         # ", then "
+    re.compile(r",\s+and then\s+", flags=re.IGNORECASE),     # ", and then "
+    re.compile(r"\s+meanwhile\s+", flags=re.IGNORECASE),     # " meanwhile "
+    re.compile(r"\s+while\s+", flags=re.IGNORECASE),         # " while "
 ]
 
 
