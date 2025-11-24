@@ -39,7 +39,7 @@ def urls() -> dict[str, list[str]]:
             "https://www.allrecipes.com/recipe/24074/alysias-basic-meat-lasagna/",
             "https://www.allrecipes.com/recipe/20096/cheesy-ham-and-hash-brown-casserole/",
         ],
-        "seriouseats": ["https://www.seriouseats.com/pecan-pie-cheesecake-recipe-11843450"],
+        "seriouseats": ["https://www.seriouseats.com/baked-sweet-potato-fries-recipe-11839467"],
     }
 
 
