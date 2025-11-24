@@ -81,22 +81,23 @@ def parse_recipe(url: str, split_by_atomic_steps: bool = True) -> Recipe:
         ValueError: If URL is invalid or recipe cannot be parsed
         requests.HTTPError: If HTTP request fails
     """
-    # Fetch raw recipe data
-    ingredients, directions = scrape_recipe(url)
-    if not ingredients or not directions:
-        raise ValueError(f"Failed to parse recipe from {url}")
+    try:
+        ingredients, directions = scrape_recipe(url)
+        if not ingredients or not directions:
+            raise ValueError(f"Failed to parse recipe from {url}")
 
-    title = extract_title_from_url(url)
-    # Parse steps with full metadata
-    steps = parse_steps_from_directions(directions, ingredients, split_by_atomic_steps=split_by_atomic_steps)
+        title = extract_title_from_url(url)
+        # Parse steps with full metadata
+        steps = parse_steps_from_directions(directions, ingredients, split_by_atomic_steps=split_by_atomic_steps)
 
-    # Create Recipe object
-    recipe = Recipe(
-        url=url,
-        title=title,
-        ingredients=ingredients,
-        directions=directions,
-        steps=steps,
-    )
-
-    return recipe
+        # Create Recipe object
+        recipe = Recipe(
+            url=url,
+            title=title,
+            ingredients=ingredients,
+            directions=directions,
+            steps=steps,
+        )
+        return recipe
+    except Exception as e:
+        raise ValueError(f"Failed to parse recipe from {url}: {e}") from e

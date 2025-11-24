@@ -33,13 +33,17 @@ def extract_title_from_url(url: str) -> str:
 
 
 def scrape_recipe(url):
-    if "allrecipes.com" in url:
-        i, d = scrape_allrecipes(url)
-    elif "seriouseats.com" in url:
-        i, d = scrape_seriouseats(url)
-    else:
-        raise ValueError(f"Unsupported recipe URL: {url}")
-    return i, d
+    try:
+        if "allrecipes.com" in url:
+            i, d = scrape_allrecipes(url)
+        elif "seriouseats.com" in url:
+            i, d = scrape_seriouseats(url)
+        else:
+            raise ValueError(f"Unsupported recipe URL: {url}")
+
+        return i, d
+    except Exception as e:
+        raise ValueError(f"Failed to scrape recipe from {url}: {e}") from e
 
 
 def scrape_allrecipes(url):
