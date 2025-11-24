@@ -73,16 +73,3 @@ Make sure `index.html`, `style.css`, and `script.js` are in the same folder.
 
 1. Close browser tab
 2. Press `Ctrl+C` in both terminals
-
----
-
-**File Structure:**
-
-```
-your-project/
-├── chat.html
-├── style.css
-├── script.js
-├── data/
-└── actions/
-```

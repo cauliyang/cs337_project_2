@@ -952,7 +952,10 @@ class ActionExternalSearch(Action):
                 step = steps[current_step - 1]
 
                 # Check if asking about tools (but not "how to" questions)
-                if any(word in message_text for word in ["tool", "tools", "equipment", "utensil", "what tool", "which tool"]):
+                if any(
+                    word in message_text
+                    for word in ["tool", "tools", "equipment", "utensil", "what tool", "which tool"]
+                ):
                     tools = step.get("tools", [])
                     if tools:
                         message = f"🔧 For step {current_step}, you'll need:\n"
@@ -963,12 +966,15 @@ class ActionExternalSearch(Action):
                     else:
                         # No tools found in step, but still answer from recipe context
                         dispatcher.utter_message(
-                            text=f"No specific tools mentioned in step {current_step}. Check the step description for details."
+                            text=f"No specific tools mentioned in step {current_step}. Check the step description for details."  # noqa: E501
                         )
                         return []
 
                 # Check if asking about methods/techniques (but not "how to" questions)
-                if any(word in message_text for word in ["method", "technique", "what method", "which method", "what technique"]):
+                if any(
+                    word in message_text
+                    for word in ["method", "technique", "what method", "which method", "what technique"]
+                ):
                     methods = step.get("methods", [])
                     if methods:
                         message = f"👨‍🍳 Methods used in step {current_step}:\n"
@@ -980,12 +986,15 @@ class ActionExternalSearch(Action):
                     else:
                         # No methods found, but still answer from recipe context
                         dispatcher.utter_message(
-                            text=f"No specific methods identified in step {current_step}. Check the step description for details."
+                            text=f"No specific methods identified in step {current_step}. Check the step description for details."  # noqa: E501
                         )
                         return []
 
                 # Check if asking about ingredients in current step
-                if any(word in message_text for word in ["ingredient", "ingredients", "what ingredient", "which ingredient"]):
+                if any(
+                    word in message_text
+                    for word in ["ingredient", "ingredients", "what ingredient", "which ingredient"]
+                ):
                     step_ingredients = step.get("ingredients", [])
                     if step_ingredients:
                         message = f"🥘 Ingredients used in step {current_step}:\n"
@@ -1003,7 +1012,7 @@ class ActionExternalSearch(Action):
                     else:
                         # No ingredients found in step
                         dispatcher.utter_message(
-                            text=f"No specific ingredients mentioned in step {current_step}. Check the step description for details."
+                            text=f"No specific ingredients mentioned in step {current_step}. Check the step description for details."  # noqa: E501
                         )
                         return []
 

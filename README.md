@@ -43,6 +43,22 @@ rasa shell
 rasa visualize
 ```
 
+## [Run the web UI](./rasa/UI.md)
+
+```sh
+cd rasa
+
+# run the action server
+rasa run actions
+
+# run the rasa server
+rasa run --enable-api --cors "*"
+
+# open the web UI or build http server with `python -m http.server`
+python -m http.server
+open index.html
+```
+
 ### Caveats
 
 In macOS with M chip, we need to install NumPy 1.26.4 manually before running the bot.

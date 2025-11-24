@@ -21,10 +21,16 @@ from .tools import extract_tools_from_text
 # Regular expressions for time extraction
 TIME_PATTERNS = [
     re.compile(
-        r"(\d+(?:\.\d+)?)\s*(?:to|\-)\s*(\d+(?:\.\d+)?)\s*(hour|hr|hours|hrs|minute|min|minutes|mins|second|sec|seconds|secs)s?", flags=re.IGNORECASE
+        r"(\d+(?:\.\d+)?)\s*(?:to|\-)\s*(\d+(?:\.\d+)?)\s*(hour|hr|hours|hrs|minute|min|minutes|mins|second|sec|seconds|secs)s?",
+        flags=re.IGNORECASE,
     ),  # "2-3 hours"
-    re.compile(r"(?:about|approximately|around|for)\s+(\d+(?:\.\d+)?)\s*(hour|hr|hours|hrs|minute|min|minutes|mins|second|sec|seconds|secs)s?", flags=re.IGNORECASE),  # "about 1 hour", "for 30 minutes"
-    re.compile(r"(\d+(?:\.\d+)?)\s*(hour|hr|hours|hrs|minute|min|minutes|mins|second|sec|seconds|secs)s?", flags=re.IGNORECASE),  # "30 minutes", "1 hour"
+    re.compile(
+        r"(?:about|approximately|around|for)\s+(\d+(?:\.\d+)?)\s*(hour|hr|hours|hrs|minute|min|minutes|mins|second|sec|seconds|secs)s?",
+        flags=re.IGNORECASE,
+    ),  # "about 1 hour", "for 30 minutes"
+    re.compile(
+        r"(\d+(?:\.\d+)?)\s*(hour|hr|hours|hrs|minute|min|minutes|mins|second|sec|seconds|secs)s?", flags=re.IGNORECASE
+    ),  # "30 minutes", "1 hour"
 ]
 
 # Regular expressions for temperature extraction
