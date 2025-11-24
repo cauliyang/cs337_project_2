@@ -1,4 +1,4 @@
-"""Custom Rasa actions for recipe bot."""
+"""Custom Rasa actions for recipe bot with spaCy-enhanced parsing."""
 
 from typing import Any
 
@@ -7,6 +7,10 @@ from rasa_sdk.events import SlotSet
 
 from recipebot.parser import parse_recipe
 from recipebot.search import search_duckduckgo, search_youtube
+
+# Note: All recipe parsing now uses spaCy optimizations by default
+# for improved accuracy in extracting ingredients, tools, methods,
+# times, and temperatures from recipe directions.
 
 
 class ActionFetchRecipe(Action):
@@ -29,8 +33,8 @@ class ActionFetchRecipe(Action):
             return []
 
         try:
-            # Parse recipe from URL (includes ingredients, directions, and steps)
-            # TODO: change finer granularity of parsing
+            # Parse recipe from URL using spaCy-enhanced parser
+            # The parser now automatically uses spaCy for better accuracy
             recipe_data = parse_recipe(
                 recipe_url,
                 split_by_atomic_steps=True,
@@ -169,31 +173,81 @@ class ActionShowCurrentStep(Action):
         dispatcher.utter_message(text=message)
         return []
 
+    def _format_time_info(self, time_info: dict) -> str:
+        """Format time information in a generalized way.
+
+        Args:
+            time_info: Time dictionary from spaCy parser
+
+        Returns:
+            Formatted time string
+        """
+        if not time_info:
+            return ""
+
+        # Handle time range
+        if "duration_min" in time_info and "duration_max" in time_info:
+            unit = time_info.get("unit", "minute")
+            unit_display = unit if unit.endswith("s") else f"{unit}s"
+            return f"{time_info['duration_min']}-{time_info['duration_max']} {unit_display}"
+
+        # Handle single duration
+        if "duration" in time_info:
+            duration = time_info["duration"]
+            if time_info.get("type") == "qualitative":
+                # Qualitative time (e.g., "until golden brown")
+                return str(duration)
+            else:
+                # Numeric duration
+                unit = time_info.get("unit", "minute")
+                unit_display = unit if unit.endswith("s") else f"{unit}s"
+                return f"{duration} {unit_display}"
+
+        # Fallback: show all key-value pairs
+        parts = []
+        for key, value in time_info.items():
+            if key not in ["type", "unit"]:  # Skip metadata keys
+                parts.append(f"{value}")
+        return ", ".join(parts) if parts else ""
+
     def _format_step(self, step: dict, step_num: int, total: int) -> str:
-        """Format step information for display."""
+        """Format step information for display (compatible with spaCy-enhanced parser)."""
         message = f"📍 Step {step_num}/{total}:\n"
         message += f"{step.get('description', '')}\n"
 
-        # Add time if present
+        # Add time if present (generalized for any spaCy parser output)
         time_info = step.get("time", {})
         if time_info:
-            if "duration" in time_info:
-                message += f"⏱️  Time: {time_info['duration']} minutes\n"
-            elif "until" in time_info:
-                message += f"⏱️  Time: {time_info['until']}\n"
+            # Format time based on available keys
+            time_str = self._format_time_info(time_info)
+            if time_str:
+                message += f"⏱️  Time: {time_str}\n"
 
-        # Add temperature if present
+        # Add temperature if present (generalized for any spaCy parser output)
         temp_info = step.get("temperature", {})
         if temp_info:
-            if "value" in temp_info:
-                message += f"🌡️  Temperature: {temp_info['value']}°{temp_info.get('unit', 'F')}\n"
-            elif "qualitative" in temp_info:
-                message += f"🌡️  Heat: {temp_info['qualitative']}\n"
+            for temp_key, temp_value in temp_info.items():
+                # Generalized display: shows any temperature key from parser
+                display_key = temp_key.replace("_", " ").title()
+                message += f"🌡️  {display_key}: {temp_value}\n"
 
         # Add tools if present
         tools = step.get("tools", [])
         if tools:
             message += f"🔧 Tools: {', '.join(tools)}\n"
+
+        # Add cooking methods if present
+        methods = step.get("methods", [])
+        if methods:
+            message += f"👨‍🍳 Methods: {', '.join(methods[:3])}\n"  # Show first 3 methods
+
+        # Add step classification info if present
+        if step.get("is_prepared"):
+            message += "📦 (Preparation step for later use)\n"
+        if step.get("info_type") == "warning":
+            message += "⚠️  Important note\n"
+        elif step.get("info_type") == "advice":
+            message += "💡 Tip\n"
 
         return message
 
@@ -373,10 +427,14 @@ class ActionAnswerTemperature(Action):
             dispatcher.utter_message(text="No temperature specified for this step.")
             return []
 
-        if "value" in temp_info:
-            message = f"🌡️ Set temperature to {temp_info['value']}°{temp_info.get('unit', 'F')}"
-        elif "qualitative" in temp_info:
-            message = f"🌡️ Use {temp_info['qualitative']} heat"
+        # Generalized handling for any temperature keys from spaCy parser
+        message_parts = []
+        for temp_key, temp_value in temp_info.items():
+            display_key = temp_key.replace("_", " ").title()
+            message_parts.append(f"🌡️ {display_key}: {temp_value}")
+
+        if message_parts:
+            message = "\n".join(message_parts)
         else:
             message = "Temperature information not clearly specified."
 
@@ -413,12 +471,10 @@ class ActionAnswerTime(Action):
             dispatcher.utter_message(text="No time specified for this step.")
             return []
 
-        if "duration" in time_info:
-            message = f"⏱️  Cook for {time_info['duration']} minutes"
-        elif "range_start" in time_info and "range_end" in time_info:
-            message = f"⏱️  Cook for {time_info['range_start']}-{time_info['range_end']} minutes"
-        elif "until" in time_info:
-            message = f"⏱️  Cook until {time_info['until']}"
+        # Use generalized time formatting
+        time_str = ActionShowCurrentStep()._format_time_info(time_info)
+        if time_str:
+            message = f"⏱️  Cook for {time_str}" if not time_str.startswith("until") else f"⏱️  {time_str}"
         else:
             message = "Time information not clearly specified."
 

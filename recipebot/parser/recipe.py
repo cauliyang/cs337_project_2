@@ -71,7 +71,7 @@ def show_recipe(recipe: Recipe):
     )
 
 
-def parse_recipe(url: str, split_by_atomic_steps: bool = True) -> Recipe:
+def parse_recipe(url: str, *, split_by_atomic_steps: bool = True, use_spacy: bool = True) -> Recipe:
     """Fetch and parse recipe from URL.
 
     Returns:
@@ -88,7 +88,9 @@ def parse_recipe(url: str, split_by_atomic_steps: bool = True) -> Recipe:
 
         title = extract_title_from_url(url)
         # Parse steps with full metadata
-        steps = parse_steps_from_directions(directions, ingredients, split_by_atomic_steps=split_by_atomic_steps)
+        steps = parse_steps_from_directions(
+            directions, ingredients, split_by_atomic_steps=split_by_atomic_steps, use_spacy=use_spacy
+        )
 
         # Create Recipe object
         recipe = Recipe(
