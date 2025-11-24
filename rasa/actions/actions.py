@@ -246,12 +246,31 @@ class ActionShowCurrentStep(Action):
                 message += f"⏱️  Time: {time_str}\n"
 
         # Add temperature if present (generalized for any spaCy parser output)
+        # Use validation to filter out invalid temperatures
         temp_info = step.get("temperature", {})
         if temp_info:
+            import re
+
             for temp_key, temp_value in temp_info.items():
-                # Generalized display: shows any temperature key from parser
-                display_key = temp_key.replace("_", " ").title()
-                message += f"🌡️  {display_key}: {temp_value}\n"
+                # Validate temperature before displaying
+                is_valid = False
+                try:
+                    temp_str = str(temp_value)
+                    match = re.search(r"(\d+)", temp_str)
+                    if match:
+                        temp_num = int(match.group(1))
+                        # Valid cooking temperature range: 50-600°F
+                        if 50 <= temp_num <= 600:
+                            is_valid = True
+                except (ValueError, AttributeError):
+                    # Check if it's qualitative (e.g., "medium heat")
+                    if temp_value and len(str(temp_value)) > 2:
+                        is_valid = True
+
+                # Only show valid temperatures
+                if is_valid:
+                    display_key = temp_key.replace("_", " ").title()
+                    message += f"🌡️  {display_key}: {temp_value}\n"
 
         # Add tools if present
         tools = step.get("tools", [])
@@ -435,6 +454,13 @@ class ActionAnswerTemperature(Action):
         """Execute the action."""
         recipe_data = tracker.get_slot("recipe_data")
         current_step = tracker.get_slot("current_step") or 0
+        message_text = tracker.latest_message.get("text", "").lower()
+
+        # Check if asking "what is X?" - this should trigger external search
+        if any(phrase in message_text for phrase in ["what is", "what's", "define"]):
+            # This is a definition question, not a parameter query
+            # Redirect to external search
+            return []  # Let fallback or external search handle it
 
         if not recipe_data or current_step < 1:
             dispatcher.utter_message(text="No active step.")
@@ -449,9 +475,34 @@ class ActionAnswerTemperature(Action):
             dispatcher.utter_message(text="No temperature specified for this step.")
             return []
 
+        # Filter out invalid temperatures (< 50°F or > 600°F are likely parsing errors)
+        valid_temps = {}
+        for temp_key, temp_value in temp_info.items():
+            # Try to extract numeric value
+            try:
+                # Handle formats like "350°F", "350 degrees", "350"
+                temp_str = str(temp_value)
+                # Extract first number
+                import re
+
+                match = re.search(r"(\d+)", temp_str)
+                if match:
+                    temp_num = int(match.group(1))
+                    # Validate temperature range
+                    if 50 <= temp_num <= 600:
+                        valid_temps[temp_key] = temp_value
+            except (ValueError, AttributeError):
+                # If we can't parse it, include it anyway (might be qualitative)
+                if temp_value and len(str(temp_value)) > 2:
+                    valid_temps[temp_key] = temp_value
+
+        if not valid_temps:
+            dispatcher.utter_message(text="No temperature specified for this step.")
+            return []
+
         # Generalized handling for any temperature keys from spaCy parser
         message_parts = []
-        for temp_key, temp_value in temp_info.items():
+        for temp_key, temp_value in valid_temps.items():
             display_key = temp_key.replace("_", " ").title()
             message_parts.append(f"🌡️ {display_key}: {temp_value}")
 
@@ -480,6 +531,12 @@ class ActionAnswerTime(Action):
         recipe_data = tracker.get_slot("recipe_data")
         current_step = tracker.get_slot("current_step") or 0
         message_text = tracker.latest_message.get("text", "").lower()
+
+        # Check if asking "what is X?" - this should trigger external search
+        if any(phrase in message_text for phrase in ["what is", "what's", "define"]):
+            # This is a definition question, not a parameter query
+            # Redirect to external search
+            return []  # Let fallback or external search handle it
 
         if not recipe_data or current_step < 1:
             dispatcher.utter_message(text="No active step.")
