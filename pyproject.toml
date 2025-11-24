@@ -9,9 +9,7 @@ classifiers = [
 ]
 license = { text = "MIT" }
 dependencies = [
-  "ftfy>=6.3.1",
   "nltk>=3.9.2",
-  "unidecode>=1.4.0",
   "thefuzz>=0.22.1",
   "requests>=2.32.5",
   "beautifulsoup4>=4.14.2",
@@ -23,19 +21,22 @@ dependencies = [
   "pydantic<1.10.10",
   "rasa>=3.6.21",
   "sqlalchemy<2.0",
-  "recipe-scrapers>=15.10.0",
   "packaging<22.0",
+  "spacy>=3.8.11",
+  "en-core-web-md @ https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.8.0/en_core_web_md-3.8.0-py3-none-any.whl",
+  "typer>=0.20.0",
 ]
 requires-python = ">= 3.10"
 
 [dependency-groups]
 dev = [
+  "recipe-scrapers>=15.10.0",
   "number-parser>=0.3.2",
-  "coverage",             # testing
-  "pytest",               # testing
-  "ruff",                 # linting
-  "ty",                   # checking types
-  "ipdb",                 # debugging
+  "coverage",                 # testing
+  "pytest",                   # testing
+  "ruff",                     # linting
+  "ty",                       # checking types
+  "ipdb",                     # debugging
   "rich>=14.1.0",
 ]
 

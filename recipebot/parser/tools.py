@@ -1,5 +1,9 @@
 """Kitchen tools database and extraction utilities."""
 
+from spacy.matcher import PhraseMatcher
+
+from .spacy_utils import get_nlp
+
 # Comprehensive kitchen tools database
 TOOLS_DATABASE = {
     "cookware": {
@@ -191,11 +195,87 @@ ACTION_TO_TOOL = {
 }
 
 
-def extract_tools_from_text(text: str) -> list[str]:
+def extract_tools_from_text(text: str, use_spacy: bool = True) -> list[str]:
     """Extract kitchen tools mentioned in text.
 
     Args:
         text: Text to extract tools from (e.g., step description)
+        use_spacy: Whether to use spaCy-based extraction (default: True)
+
+    Returns:
+        List of identified tools
+    """
+    if use_spacy:
+        return _extract_tools_with_spacy(text)
+    else:
+        return _extract_tools_legacy(text)
+
+
+def _extract_tools_with_spacy(text: str) -> list[str]:
+    """Extract tools using spaCy's advanced matching.
+
+    Args:
+        text: Text to extract tools from
+
+    Returns:
+        List of identified tools
+    """
+    nlp = get_nlp()
+    doc = nlp(text)
+    found_tools = []
+    seen = set()
+
+    # Create phrase matcher for tools
+    tool_matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
+    # Sort tools by length (longest first) to match longer phrases first
+    sorted_tools = sorted(ALL_TOOLS, key=len, reverse=True)
+    patterns = [nlp.make_doc(tool) for tool in sorted_tools]
+    tool_matcher.add("TOOL", patterns)
+
+    # Track matched spans to avoid redundancy
+    matched_spans = set()
+
+    # Find explicit tool mentions (prioritize longer matches)
+    matches = tool_matcher(doc)
+    for _match_id, start, end in matches:
+        span_range = (start, end)
+        tool = doc[start:end].text.lower()
+
+        # Only add if not a substring of an already matched tool
+        is_substring = False
+        for existing_tool in found_tools:
+            if tool != existing_tool and tool in existing_tool:
+                is_substring = True
+                break
+
+        if tool not in seen and not is_substring:
+            found_tools.append(tool)
+            seen.add(tool)
+            matched_spans.add(span_range)
+
+    # Infer tools from action verbs using lemmatization
+    for token in doc:
+        if token.pos_ == "VERB":
+            # Check lemma and text
+            for form in [token.lemma_, token.lower_]:
+                if form in ACTION_TO_TOOL:
+                    tool = ACTION_TO_TOOL[form]
+                    # Only add if not already explicitly mentioned
+                    if tool not in seen:
+                        # Check if a more specific version is already present
+                        is_redundant = any(tool in existing for existing in found_tools)
+                        if not is_redundant:
+                            found_tools.append(tool)
+                            seen.add(tool)
+
+    return found_tools
+
+
+def _extract_tools_legacy(text: str) -> list[str]:
+    """Legacy regex-based tool extraction (fallback).
+
+    Args:
+        text: Text to extract tools from
 
     Returns:
         List of identified tools

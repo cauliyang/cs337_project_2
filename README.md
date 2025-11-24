@@ -87,8 +87,14 @@ make lint
 - [ ] make chatbot answer which ingredient is used in the step instead of searching the web
 - [ ] make chatbot answer which method is used in the step instead of searching the web
 - [ ] make chatbot answer which time is used in the step instead of searching the web
-- [ ] add voice support
+- [x] add voice support
 - [ ] add slack integration
+- [x] use spacy to parse the relationship
+- [x] fix failing cases
+- [x] Make web query trigger correctly
+- [ ] Make Rosa trigger how questions
+- [ ] Integrate with Slack
+- [ ] Record a demo video
 
 ## Problem Cases to Fix
 
@@ -100,9 +106,3 @@ Bake in the preheated oven until bubbly and lightly brown, about 1 hour.
 ⏱️  Time: 1 minutes
 🔧 Tools: oven
 ```
-
-## Project Description
-
-- Free software: MIT License
-
-## Credits

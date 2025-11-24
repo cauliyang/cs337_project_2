@@ -6,6 +6,16 @@ from typing import Literal
 from recipebot.model import Ingredient, Step
 
 from .methods import extract_methods_from_text
+from .spacy_utils import (
+    create_temperature_matcher,
+    create_time_matcher,
+    extract_temperature_with_spacy,
+    extract_time_with_spacy,
+    get_nlp,
+    is_imperative_sentence,
+    match_ingredient_with_spacy,
+    split_into_sentences_with_spacy,
+)
 from .tools import extract_tools_from_text
 
 # Regular expressions for time extraction
@@ -35,16 +45,27 @@ SENTENCE_SPLITTERS = [
 ]
 
 
-def extract_time_from_text(text: str) -> dict[str, str | int]:
+def extract_time_from_text(text: str, use_spacy: bool = True) -> dict[str, str | int]:
     """Extract time/duration information from text.
 
     Args:
         text: Text to extract time from
+        use_spacy: Whether to use spaCy-based extraction (default: True)
 
     Returns:
         Dictionary with time information
     """
-    time_info = {}
+    if use_spacy:
+        nlp = get_nlp()
+        doc = nlp(text)
+        time_matcher = create_time_matcher(nlp)
+        spacy_time_info = extract_time_with_spacy(doc, time_matcher)
+        if spacy_time_info:
+            return spacy_time_info
+        # Fall back to regex if spaCy doesn't find anything
+
+    # Legacy regex-based extraction
+    time_info: dict[str, str | int] = {}
     text_lower = text.lower()
 
     # Check for range patterns first (e.g., "2-3 hours")
@@ -82,16 +103,27 @@ def extract_time_from_text(text: str) -> dict[str, str | int]:
     return time_info
 
 
-def extract_temperature_from_text(text: str) -> dict[str, str]:
+def extract_temperature_from_text(text: str, use_spacy: bool = True) -> dict[str, str]:
     """Extract temperature information from text.
 
     Args:
         text: Text to extract temperature from
+        use_spacy: Whether to use spaCy-based extraction (default: True)
 
     Returns:
         Dictionary with temperature information
     """
-    temp_info = {}
+    if use_spacy:
+        nlp = get_nlp()
+        doc = nlp(text)
+        temp_matcher = create_temperature_matcher(nlp)
+        spacy_temp_info = extract_temperature_with_spacy(doc, temp_matcher)
+        if spacy_temp_info:
+            return spacy_temp_info
+        # Fall back to regex if spaCy doesn't find anything
+
+    # Legacy regex-based extraction
+    temp_info: dict[str, str] = {}
 
     # Check for numeric temperature patterns
     for pattern in TEMP_PATTERNS[:3]:
@@ -116,16 +148,33 @@ def extract_temperature_from_text(text: str) -> dict[str, str]:
     return temp_info
 
 
-def split_into_atomic_steps(direction: str) -> list[str]:
+def split_into_atomic_steps(direction: str, use_spacy: bool = True) -> list[str]:
     """Split a complex direction into atomic steps.
 
     Args:
         direction: Single direction text
+        use_spacy: Whether to use spaCy-based splitting (default: True)
 
     Returns:
         List of atomic step descriptions
     """
-    # First, try to split by common patterns
+    if use_spacy:
+        nlp = get_nlp()
+        sentences = split_into_sentences_with_spacy(direction, nlp)
+
+        # Clean up steps
+        cleaned_steps = []
+        for step in sentences:
+            # Remove leading conjunctions
+            step = re.sub(r"^(then|and|meanwhile|while)\s+", "", step, flags=re.IGNORECASE)
+            # Ensure first letter is capitalized
+            if step:
+                step = step[0].upper() + step[1:]
+                cleaned_steps.append(step)
+
+        return cleaned_steps if cleaned_steps else [direction]
+
+    # Legacy regex-based splitting
     steps = [direction]
 
     # Split by sentence boundaries with conjunctions
@@ -150,16 +199,27 @@ def split_into_atomic_steps(direction: str) -> list[str]:
     return cleaned_steps if cleaned_steps else [direction]
 
 
-def classify_step_type(text: str) -> tuple[bool, bool, Literal["warning", "advice", "observation"] | None]:
+def classify_step_type(
+    text: str, use_spacy: bool = True
+) -> tuple[bool, bool, Literal["warning", "advice", "observation"] | None]:
     """Classify step as actionable, preparatory, or informational.
 
     Args:
         text: Step description
+        use_spacy: Whether to use spaCy-based classification (default: True)
 
     Returns:
         Tuple of (actionable, is_prepared, info_type)
     """
     text_lower = text.lower()
+
+    # Enhanced classification using spaCy
+    if use_spacy:
+        nlp = get_nlp()
+        doc = nlp(text)
+
+        # Check if it's an imperative sentence (command) -> more likely actionable
+        _is_imperative = is_imperative_sentence(doc)
 
     # Check for warnings
     warning_patterns = ["be careful", "do not", "don't", "avoid", "make sure", "watch", "be sure", "ensure"]
@@ -173,7 +233,18 @@ def classify_step_type(text: str) -> tuple[bool, bool, Literal["warning", "advic
         if pattern in text_lower:
             return (False, False, "advice")
 
-    # Check for observations
+    # Check for observations (using spaCy for better detection)
+    if use_spacy:
+        nlp = get_nlp()
+        doc = nlp(text)
+        # Look for future tense patterns
+        for token in doc:
+            if token.tag_ in ["MD"] and token.lower_ in ["will", "should"]:  # Modal verbs
+                # Check if followed by "be", "look", "become"
+                for child in token.children:
+                    if child.lemma_ in ["be", "look", "become"]:
+                        return (False, False, "observation")
+
     observation_patterns = [
         "will be",
         "should be",
@@ -206,20 +277,40 @@ def classify_step_type(text: str) -> tuple[bool, bool, Literal["warning", "advic
     return (True, is_prepared, None)
 
 
-def extract_ingredients_from_step(step_text: str, all_ingredients: list[Ingredient]) -> list[Ingredient]:
+def extract_ingredients_from_step(
+    step_text: str, all_ingredients: list[Ingredient], use_spacy: bool = True
+) -> list[Ingredient]:
     """Find which ingredients from the recipe are mentioned in this step.
 
     Args:
         step_text: Step description
         all_ingredients: List of all ingredients in recipe
+        use_spacy: Whether to use spaCy-based matching (default: True)
 
     Returns:
         List of ingredients used in this step
     """
+    if use_spacy:
+        nlp = get_nlp()
+        doc = nlp(step_text)
+        found_ingredients = []
+
+        for ingredient in all_ingredients:
+            # Handle potential None values for ingredient.name
+            if ingredient.name is not None and match_ingredient_with_spacy(ingredient.name, doc, nlp):
+                found_ingredients.append(ingredient)
+
+        return found_ingredients
+
+    # Legacy string-based matching
     step_text_lower = step_text.lower()
     found_ingredients = []
 
     for ingredient in all_ingredients:
+        # Handle potential None values for ingredient.name
+        if ingredient.name is None:
+            continue
+
         # Check for ingredient name or variations
         name_lower = ingredient.name.lower()
 
@@ -251,6 +342,7 @@ def parse_steps_from_directions(
     all_ingredients: list[Ingredient],
     context: dict | None = None,
     split_by_atomic_steps: bool = True,
+    use_spacy: bool = True,
 ) -> list[Step]:
     """Parse directions into structured steps with full metadata.
 
@@ -258,6 +350,8 @@ def parse_steps_from_directions(
         directions: List of direction strings
         all_ingredients: List of ingredients in recipe
         context: Optional context to carry forward (e.g., oven temperature)
+        split_by_atomic_steps: Whether to split complex directions into atomic steps
+        use_spacy: Whether to use spaCy-based parsing (default: True)
 
     Returns:
         List of parsed Step objects
@@ -270,16 +364,16 @@ def parse_steps_from_directions(
 
     for direction in directions:
         # Split into atomic steps if needed
-        atomic_steps = split_into_atomic_steps(direction) if split_by_atomic_steps else [direction]
+        atomic_steps = split_into_atomic_steps(direction, use_spacy=use_spacy) if split_by_atomic_steps else [direction]
 
         for atomic_step in atomic_steps:
-            # Extract all metadata
-            tools = extract_tools_from_text(atomic_step)
-            primary_methods, secondary_methods = extract_methods_from_text(atomic_step)
+            # Extract all metadata using spaCy-enhanced functions
+            tools = extract_tools_from_text(atomic_step, use_spacy=use_spacy)
+            primary_methods, secondary_methods = extract_methods_from_text(atomic_step, use_spacy=use_spacy)
             all_methods = primary_methods + secondary_methods
 
-            time_info = extract_time_from_text(atomic_step)
-            temp_info = extract_temperature_from_text(atomic_step)
+            time_info = extract_time_from_text(atomic_step, use_spacy=use_spacy)
+            temp_info = extract_temperature_from_text(atomic_step, use_spacy=use_spacy)
 
             # Carry forward oven temperature from context if baking/roasting
             if any(method in ["bake", "baking", "roast", "roasting"] for method in primary_methods):
@@ -291,10 +385,10 @@ def parse_steps_from_directions(
                 context["oven_temp"] = temp_info["oven"]
 
             # Classify step
-            actionable, is_prepared, info_type = classify_step_type(atomic_step)
+            actionable, is_prepared, info_type = classify_step_type(atomic_step, use_spacy=use_spacy)
 
             # Find ingredients mentioned in this step
-            step_ingredients = extract_ingredients_from_step(atomic_step, all_ingredients)
+            step_ingredients = extract_ingredients_from_step(atomic_step, all_ingredients, use_spacy=use_spacy)
 
             # Create Step object
             step = Step(
