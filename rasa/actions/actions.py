@@ -9,6 +9,25 @@ from recipebot.parser import parse_recipe
 from recipebot.search import search_duckduckgo, search_youtube
 
 
+def clean_url(url: str) -> str:
+    """Clean URL from Slack formatting and other issues."""
+    if not url:
+        return url
+
+    # Remove Slack's angle bracket formatting: <url> or <url|text>
+    if url.startswith("<") and url.endswith(">"):
+        url = url[1:-1]
+
+    # Remove Slack's pipe separator and display text: <url|text>
+    if "|" in url:
+        url = url.split("|")[0]
+
+    # Strip whitespace
+    url = url.strip()
+
+    return url
+
+
 class ActionFetchRecipe(Action):
     """Fetch and parse recipe from URL."""
 
@@ -26,6 +45,13 @@ class ActionFetchRecipe(Action):
 
         if not recipe_url:
             dispatcher.utter_message(text="Please provide a recipe URL.")
+            return []
+
+        # Clean URL from Slack formatting
+        recipe_url = clean_url(recipe_url)
+
+        if not recipe_url:
+            dispatcher.utter_message(text="Invalid URL format.")
             return []
 
         try:
@@ -961,6 +987,13 @@ class ValidateRecipeUrlForm(Action):
         recipe_url = tracker.get_slot("recipe_url")
 
         if not recipe_url:
+            return [SlotSet("recipe_url", None)]
+
+        # Clean URL from Slack formatting
+        recipe_url = clean_url(recipe_url)
+
+        if not recipe_url:
+            dispatcher.utter_message(text="Invalid URL format.")
             return [SlotSet("recipe_url", None)]
 
         # Basic URL validation

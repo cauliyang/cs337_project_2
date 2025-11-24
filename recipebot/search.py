@@ -16,8 +16,8 @@ class SearchResult(BaseModel):
 
 
 def modify_query(query: str) -> str:
-    """Modify the query to make it more specific."""
-    return query + "related cooking recipe"
+    """Modify the query to ensure it's strongly related to cooking or recipes."""
+    return f"{query} cooking kitchen recipe food technique"
 
 
 def search_youtube(query, max_results=5):
