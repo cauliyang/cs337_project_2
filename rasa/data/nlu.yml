@@ -135,6 +135,12 @@ nlu:
       - for how long
       - how many minutes
       - duration please
+      - how will I know when it's done
+      - how do I know it's ready
+      - when is it ready
+      - how long should I wait
+      - is it done yet
+      - how do I tell when it's finished
 
   - intent: ask_quantity
     examples: |
@@ -148,6 +154,13 @@ nlu:
       - [onion](ingredient) quantity
       - amount of [cheese](ingredient)
       - how much [water](ingredient)
+      - how much [that](ingredient)
+      - how much [it](ingredient)
+      - how much of [this](ingredient)
+      - quantity of [that](ingredient)
+      - how many [that](ingredient)
+      - what amount of [this](ingredient)
+      - how much [that](ingredient) do I add
 
   - intent: ask_substitution
     examples: |
@@ -160,6 +173,12 @@ nlu:
       - substitute [cream](ingredient)
       - replace [chicken](ingredient) with what
       - alternatives for [nuts](ingredient)
+      - can I swap [butter](ingredient)
+      - what's a good substitute for [that](ingredient)
+      - replace [this](ingredient) with what
+      - I don't have [butter](ingredient), what can I use
+      - substitute [it](ingredient) with what
+      - alternatives to [this](ingredient)
 
   # ===== Clarification =====
   - intent: ask_definition
@@ -173,6 +192,12 @@ nlu:
       - what's [julienne](search_term)
       - meaning of [blanch](search_term)
       - what is [zest](search_term)
+      - what's a [mandoline](search_term)
+      - define [al dente](search_term)
+      - what does [simmer](search_term) mean
+      - what is [mise en place](search_term)
+      - what's [deglazing](search_term)
+      - explain [emulsify](search_term)
 
   # ===== Procedure Questions =====
   - intent: ask_how_to
@@ -187,6 +212,15 @@ nlu:
       - show me how to do that
       - how do I [grate cheese](search_term)
       - how to [whisk eggs](search_term)
+      - how do I do it
+      - show me how
+      - how can I do that
+      - what's the best way to do this
+      - how should I perform this step
+      - can you show me how to do that
+      - how to [sprinkle](search_term)
+      - how do I [dice](search_term)
+      - how to [mince](search_term)
 
   # ===== General =====
   - intent: greet

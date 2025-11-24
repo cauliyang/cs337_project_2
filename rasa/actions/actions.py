@@ -439,7 +439,7 @@ class ActionAnswerTemperature(Action):
 
 
 class ActionAnswerTime(Action):
-    """Answer time-related questions."""
+    """Answer time-related questions including 'when is it done?' queries."""
 
     def name(self) -> str:
         return "action_answer_time"
@@ -453,6 +453,7 @@ class ActionAnswerTime(Action):
         """Execute the action."""
         recipe_data = tracker.get_slot("recipe_data")
         current_step = tracker.get_slot("current_step") or 0
+        message_text = tracker.latest_message.get("text", "").lower()
 
         if not recipe_data or current_step < 1:
             dispatcher.utter_message(text="No active step.")
@@ -463,8 +464,65 @@ class ActionAnswerTime(Action):
 
         time_info = step.get("time", {})
 
+        # Check if asking "when is it done?" - look for done indicators
+        is_done_question = any(
+            phrase in message_text
+            for phrase in ["when is it done", "how do i know", "when done", "is it ready", "how will i know"]
+        )
+
+        if is_done_question:
+            # Look for done indicators in step description
+            description = step.get("description", "").lower()
+            done_indicators = []
+
+            # Common done indicators
+            if "until" in description:
+                # Extract text after "until"
+                until_idx = description.find("until")
+                until_text = description[until_idx:].split(".")[0]
+                done_indicators.append(until_text)
+
+            if "golden" in description or "brown" in description:
+                done_indicators.append("until golden brown")
+
+            if "tender" in description:
+                done_indicators.append("until tender")
+
+            if "bubbl" in description:  # bubbling, bubbly
+                done_indicators.append("until bubbling")
+
+            if "thick" in description:
+                done_indicators.append("until thickened")
+
+            if "soft" in description:
+                done_indicators.append("until soft")
+
+            if "crisp" in description:
+                done_indicators.append("until crispy")
+
+            if done_indicators:
+                message = f"✅ You'll know it's done: {', '.join(done_indicators)}"
+                if time_info:
+                    time_str = ActionShowCurrentStep()._format_time_info(time_info)
+                    if time_str:
+                        message += f"\n⏱️  Time: {time_str}"
+                dispatcher.utter_message(text=message)
+                return []
+            else:
+                # No indicators found, provide step description
+                dispatcher.utter_message(
+                    text=f"ℹ️  Step description: {step.get('description', 'No specific done indicator mentioned.')}"
+                )
+                return []
+
+        # Standard time query
         if not time_info:
-            dispatcher.utter_message(text="No time specified for this step.")
+            # Check description for time clues
+            description = step.get("description", "")
+            if "until" in description.lower():
+                dispatcher.utter_message(text=f"⏱️  No specific time, but the step says: {description}")
+            else:
+                dispatcher.utter_message(text="⏱️  No time specified for this step.")
             return []
 
         # Use generalized time formatting
@@ -479,7 +537,7 @@ class ActionAnswerTime(Action):
 
 
 class ActionAnswerQuantity(Action):
-    """Answer ingredient quantity questions."""
+    """Answer ingredient quantity questions with context-aware vague reference resolution."""
 
     def name(self) -> str:
         return "action_answer_quantity"
@@ -492,6 +550,11 @@ class ActionAnswerQuantity(Action):
     ) -> list[dict[str, Any]]:
         """Execute the action."""
         recipe_data = tracker.get_slot("recipe_data")
+        current_step = tracker.get_slot("current_step") or 0
+
+        if not recipe_data:
+            dispatcher.utter_message(text="No recipe loaded.")
+            return []
 
         # Extract ingredient from entities
         ingredient_name = None
@@ -500,13 +563,32 @@ class ActionAnswerQuantity(Action):
                 ingredient_name = entity.get("value")
                 break
 
-        if not recipe_data:
-            dispatcher.utter_message(text="No recipe loaded.")
-            return []
+        # Handle vague references: "that", "it", "this"
+        if not ingredient_name or ingredient_name in ["that", "it", "this"]:
+            # Try to resolve from current step context
+            if current_step > 0:
+                steps = recipe_data.get("steps", [])
+                if current_step <= len(steps):
+                    step = steps[current_step - 1]
+                    step_ingredients = step.get("ingredients", [])
 
-        if not ingredient_name:
-            dispatcher.utter_message(text="Which ingredient are you asking about?")
-            return []
+                    if step_ingredients:
+                        # Use the first/most relevant ingredient from current step
+                        ingredient_name = step_ingredients[0].get("name", "")
+                        if ingredient_name:
+                            dispatcher.utter_message(
+                                text=f"I'll assume you're asking about {ingredient_name} from the current step."
+                            )
+
+            # If still no ingredient, check last mentioned
+            if not ingredient_name or ingredient_name in ["that", "it", "this"]:
+                last_mentioned = tracker.get_slot("last_mentioned_ingredient")
+                if last_mentioned:
+                    ingredient_name = last_mentioned
+                    dispatcher.utter_message(text=f"I'll assume you mean {ingredient_name}.")
+                else:
+                    dispatcher.utter_message(text="Which ingredient are you asking about?")
+                    return []
 
         # Search for ingredient in recipe
         ingredients = recipe_data.get("ingredients", [])
@@ -524,6 +606,7 @@ class ActionAnswerQuantity(Action):
         quantity = found.get("quantity", "")
         unit = found.get("unit", "")
         name = found.get("name", "")
+        preparation = found.get("preparation", "")
 
         message = f"📏 {name}: "
         if quantity:
@@ -532,6 +615,9 @@ class ActionAnswerQuantity(Action):
             message += unit
         else:
             message += "to taste"
+
+        if preparation:
+            message += f" ({preparation})"
 
         dispatcher.utter_message(text=message)
         return [SlotSet("last_mentioned_ingredient", name)]
@@ -727,6 +813,24 @@ class ActionExternalSearch(Action):
         # Check if "how to" question - these should always get external tutorials
         is_how_to_question = any(phrase in message_text for phrase in ["how to", "how do i", "how can i"])
 
+        # Handle vague procedure questions: "how do I do that?" "how should I do this?"
+        is_vague_procedure = any(phrase in message_text for phrase in ["do that", "do this", "do it"])
+        resolved_method = None
+
+        if is_vague_procedure and is_how_to_question and recipe_data and current_step > 0:
+            # Resolve "that/this/it" from current step's main action
+            steps = recipe_data.get("steps", [])
+            if current_step <= len(steps):
+                step = steps[current_step - 1]
+                methods = step.get("methods", [])
+
+                if methods:
+                    # Use the primary method from current step
+                    resolved_method = methods[0]
+                    dispatcher.utter_message(
+                        text=f"I'll search for how to {resolved_method} (from your current step)..."
+                    )
+
         # If it's a "how to" question, skip recipe check and go straight to external search
         # Users asking "how to" want detailed tutorials, not just method names
         if not is_how_to_question and recipe_data and current_step > 0:
@@ -756,12 +860,15 @@ class ActionExternalSearch(Action):
                         return []
 
         # If not found in recipe data, fall back to external search
-        # Extract search term from entities
-        search_term = None
-        for entity in tracker.latest_message.get("entities", []):
-            if entity.get("entity") == "search_term":
-                search_term = entity.get("value")
-                break
+        # Use resolved method if available (from vague reference)
+        search_term = resolved_method if resolved_method else None
+
+        # Extract search term from entities if not already resolved
+        if not search_term:
+            for entity in tracker.latest_message.get("entities", []):
+                if entity.get("entity") == "search_term":
+                    search_term = entity.get("value")
+                    break
 
         # If no entity, try to extract from message
         if not search_term:
@@ -824,14 +931,17 @@ class ActionUpdateContext(Action):
         # Extract context information from step
         methods = step.get("methods", [])
         tools = step.get("tools", [])
+        step_ingredients = step.get("ingredients", [])
 
-        # Store last action and tool for vague reference resolution
+        # Store last action, tool, and ingredient for vague reference resolution
         last_action = methods[0] if methods else None
         last_tool = tools[0] if tools else None
+        last_ingredient = step_ingredients[0].get("name") if step_ingredients else None
 
         return [
             SlotSet("last_action", last_action),
             SlotSet("last_tool", last_tool),
+            SlotSet("last_mentioned_ingredient", last_ingredient),
         ]
 
 

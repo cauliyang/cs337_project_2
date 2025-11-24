@@ -59,6 +59,21 @@ rules:
       - intent: ask_time
       - action: action_answer_time
 
+  - rule: answer substitution
+    steps:
+      - intent: ask_substitution
+      - action: action_answer_substitution
+
+  - rule: answer how-to procedure
+    steps:
+      - intent: ask_how_to
+      - action: action_external_search
+
+  - rule: answer definition
+    steps:
+      - intent: ask_definition
+      - action: action_external_search
+
   - rule: repeat current step
     steps:
       - intent: repeat_step
