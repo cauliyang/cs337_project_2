@@ -38,8 +38,16 @@ def urls() -> dict[str, list[str]]:
         "allrecipes": [
             "https://www.allrecipes.com/recipe/24074/alysias-basic-meat-lasagna/",
             "https://www.allrecipes.com/recipe/20096/cheesy-ham-and-hash-brown-casserole/",
+            "https://www.allrecipes.com/recipe/166160/juicy-thanksgiving-turkey/",
+            "https://www.allrecipes.com/recipe/238577/homemade-bread-stuffing/",
+            "https://www.allrecipes.com/recipe/6820/downeast-maine-pumpkin-bread/",
+            "https://www.allrecipes.com/recipe/54614/turkey-brine/",
         ],
-        "seriouseats": ["https://www.seriouseats.com/baked-sweet-potato-fries-recipe-11839467"],
+        "seriouseats": [
+            "https://www.seriouseats.com/baked-sweet-potato-fries-recipe-11839467",
+            "https://www.seriouseats.com/ultra-fluffy-mashed-potatoes-recipe",
+            "https://www.seriouseats.com/roasted-brussels-sprouts-bacon-pecans-maple-balsamic-recipe",
+        ],
     }
 
 

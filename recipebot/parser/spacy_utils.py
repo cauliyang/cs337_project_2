@@ -3,6 +3,7 @@
 import re
 
 import spacy
+from number_parser import parse as parse_number
 from spacy.matcher import Matcher, PhraseMatcher
 from spacy.tokens import Doc, Span
 
@@ -36,24 +37,37 @@ def create_time_matcher(nlp: spacy.language.Language) -> Matcher:
     """
     matcher = Matcher(nlp.vocab)
 
-    # Pattern: "30 minutes", "2 hours", "5 seconds"
+    # Pattern: "30 minutes", "2 hours", "5 seconds", "1 ½ hours" (fraction as separate token)
     matcher.add(
         "TIME_DURATION",
         [
             [{"LIKE_NUM": True}, {"LOWER": {"IN": ["hour", "hours", "hr", "hrs", "h"]}}],
             [{"LIKE_NUM": True}, {"LOWER": {"IN": ["minute", "minutes", "min", "mins", "m"]}}],
             [{"LIKE_NUM": True}, {"LOWER": {"IN": ["second", "seconds", "sec", "secs", "s"]}}],
+            # Handle fractions as separate tokens: "1 ½ hours"
+            [
+                {"LIKE_NUM": True},
+                {"TEXT": {"REGEX": "[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]"}},
+                {"LOWER": {"IN": ["hour", "hours", "hr", "hrs"]}},
+            ],
+            [
+                {"LIKE_NUM": True},
+                {"TEXT": {"REGEX": "[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]"}},
+                {"LOWER": {"IN": ["minute", "minutes", "min", "mins"]}},
+            ],
         ],
     )
 
-    # Pattern: "2-3 hours", "30 to 45 minutes"
+    # Pattern: "2-3 hours", "30 to 45 minutes", "30 to 60 more minutes", "2 ½ to 3 hours"
     matcher.add(
         "TIME_RANGE",
         [
+            # Standard range: "30 to 60 minutes"
             [
                 {"LIKE_NUM": True},
                 {"TEXT": {"IN": ["-", "to", "or"]}},
                 {"LIKE_NUM": True},
+                {"LOWER": "more", "OP": "?"},  # Optional "more" for "30 to 60 more minutes"
                 {
                     "LOWER": {
                         "IN": [
@@ -73,10 +87,32 @@ def create_time_matcher(nlp: spacy.language.Language) -> Matcher:
                     }
                 },
             ],
+            # Range with fraction as separate token: "2 ½ to 3 hours"
+            [
+                {"LIKE_NUM": True},
+                {"TEXT": {"REGEX": "[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]"}},
+                {"TEXT": {"IN": ["-", "to", "or"]}},
+                {"LIKE_NUM": True},
+                {"LOWER": "more", "OP": "?"},
+                {
+                    "LOWER": {
+                        "IN": [
+                            "hour",
+                            "hours",
+                            "hr",
+                            "hrs",
+                            "minute",
+                            "minutes",
+                            "min",
+                            "mins",
+                        ]
+                    }
+                },
+            ],
         ],
     )
 
-    # Pattern: "for 30 minutes"
+    # Pattern: "for 30 minutes", "for 1 ½ hours"
     matcher.add(
         "TIME_FOR",
         [
@@ -98,6 +134,26 @@ def create_time_matcher(nlp: spacy.language.Language) -> Matcher:
                             "seconds",
                             "sec",
                             "secs",
+                        ]
+                    }
+                },
+            ],
+            # Handle fraction as separate token: "for 1 ½ hours"
+            [
+                {"LOWER": "for"},
+                {"LIKE_NUM": True},
+                {"TEXT": {"REGEX": "[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]"}},
+                {
+                    "LOWER": {
+                        "IN": [
+                            "hour",
+                            "hours",
+                            "hr",
+                            "hrs",
+                            "minute",
+                            "minutes",
+                            "min",
+                            "mins",
                         ]
                     }
                 },
@@ -197,7 +253,80 @@ def create_method_phrase_matcher(nlp: spacy.language.Language, methods: set[str]
     return matcher
 
 
-def extract_time_with_spacy(doc: Doc, time_matcher: Matcher) -> dict[str, str | int]:
+def _parse_number_with_fraction(text: str) -> float:
+    """Parse a number that may contain fractions using number-parser library."""
+    from fractions import Fraction
+
+    # Map of Unicode fractions to decimal values (for quick lookup)
+    unicode_fractions = {
+        "½": 0.5,
+        "⅓": 0.333,
+        "⅔": 0.667,
+        "¼": 0.25,
+        "¾": 0.75,
+        "⅕": 0.2,
+        "⅖": 0.4,
+        "⅗": 0.6,
+        "⅘": 0.8,
+        "⅙": 0.167,
+        "⅚": 0.833,
+        "⅛": 0.125,
+        "⅜": 0.375,
+        "⅝": 0.625,
+        "⅞": 0.875,
+    }
+
+    # Check for pure Unicode fraction
+    if text in unicode_fractions:
+        return unicode_fractions[text]
+
+    # Check for mixed number with Unicode fraction (e.g., "2½")
+    for frac_char, frac_value in unicode_fractions.items():
+        if frac_char in text:
+            # Try to extract whole number part
+            num_part = text.replace(frac_char, "").strip()
+            if num_part:
+                try:
+                    return float(num_part) + frac_value
+                except ValueError:
+                    return frac_value
+            else:
+                return frac_value
+
+    # Try number-parser for text like "three", "one and a half"
+    try:
+        result = parse_number(text)
+        if result is not None:
+            # Try direct float conversion
+            try:
+                return float(result)
+            except (ValueError, TypeError):
+                # Try parsing as fraction (e.g., "1/2", "3/4")
+                result_str = str(result)
+                try:
+                    return float(Fraction(result_str))
+                except (ValueError, ZeroDivisionError):
+                    # Try parsing mixed numbers "2 1/2" format
+                    try:
+                        parts = result_str.split()
+                        if len(parts) == 2:
+                            # "2 1/2" format
+                            whole = float(parts[0])
+                            frac = float(Fraction(parts[1]))
+                            return whole + frac
+                    except (ValueError, ZeroDivisionError, IndexError):
+                        pass
+    except (ValueError, TypeError, AttributeError):
+        pass
+
+    # Fallback to simple float conversion
+    try:
+        return float(text)
+    except ValueError:
+        return 0.0
+
+
+def extract_time_with_spacy(doc: Doc, time_matcher: Matcher) -> dict[str, str | int | float]:
     """Extract time information using spaCy matcher.
 
     Args:
@@ -207,19 +336,49 @@ def extract_time_with_spacy(doc: Doc, time_matcher: Matcher) -> dict[str, str | 
     Returns:
         Dictionary with time information
     """
-    time_info: dict[str, str | int] = {}
+    time_info: dict[str, str | int | float] = {}
     matches = time_matcher(doc)
 
-    for match_id, start, end in matches:
+    # Prioritize numeric time patterns over qualitative ones
+    # Sort matches: RANGE, DURATION, FOR, then UNTIL
+    match_priority = {"TIME_RANGE": 0, "TIME_DURATION": 1, "TIME_FOR": 1, "TIME_UNTIL": 2}
+    sorted_matches = sorted(matches, key=lambda m: match_priority.get(doc.vocab.strings[m[0]], 3))
+
+    for match_id, start, end in sorted_matches:
         span = doc[start:end]
         match_type = doc.vocab.strings[match_id]
 
         if match_type == "TIME_RANGE":
-            # Extract min and max values
-            numbers = [token for token in span if token.like_num]
-            if len(numbers) >= 2:
-                time_info["duration_min"] = int(float(numbers[0].text))
-                time_info["duration_max"] = int(float(numbers[1].text))
+            # Extract min and max values, handling fractions (including adjacent tokens)
+            numbers = []
+            for token in span:
+                if token.like_num or any(
+                    frac in token.text
+                    for frac in ["½", "⅓", "⅔", "¼", "¾", "⅕", "⅖", "⅗", "⅘", "⅙", "⅚", "⅛", "⅜", "⅝", "⅞"]
+                ):
+                    numbers.append(token.text)
+
+            # Handle different number patterns
+            if len(numbers) == 2:
+                # Simple range: "30 to 60" or pure fractions
+                time_info["duration_min"] = _parse_number_with_fraction(numbers[0])
+                time_info["duration_max"] = _parse_number_with_fraction(numbers[1])
+            elif len(numbers) == 3:
+                # Mixed number range: "2 ½ to 3" (numbers = ["2", "½", "3"])
+                # First number is whole + fraction, second is the max
+                whole = _parse_number_with_fraction(numbers[0])
+                frac = _parse_number_with_fraction(numbers[1])
+                time_info["duration_min"] = whole + frac
+                time_info["duration_max"] = _parse_number_with_fraction(numbers[2])
+            elif len(numbers) == 4:
+                # Both mixed: "1 ½ to 2 ½" (numbers = ["1", "½", "2", "½"])
+                time_info["duration_min"] = _parse_number_with_fraction(numbers[0]) + _parse_number_with_fraction(
+                    numbers[1]
+                )
+                time_info["duration_max"] = _parse_number_with_fraction(numbers[2]) + _parse_number_with_fraction(
+                    numbers[3]
+                )
+            if "duration_min" in time_info:
                 # Extract unit
                 for token in span:
                     if token.lower_ in ["hour", "hours", "hr", "hrs"]:
@@ -234,16 +393,32 @@ def extract_time_with_spacy(doc: Doc, time_matcher: Matcher) -> dict[str, str | 
                 return time_info
 
         elif match_type in ["TIME_DURATION", "TIME_FOR"]:
-            # Extract single value
+            # Extract single value, handling fractions (including separate tokens)
+            numbers = []
             for token in span:
-                if token.like_num:
-                    time_info["duration"] = int(float(token.text))
+                if token.like_num or any(
+                    frac in token.text
+                    for frac in ["½", "⅓", "⅔", "¼", "¾", "⅕", "⅖", "⅗", "⅘", "⅙", "⅚", "⅛", "⅜", "⅝", "⅞"]
+                ):
+                    numbers.append(token.text)
                 elif token.lower_ in ["hour", "hours", "hr", "hrs"]:
                     time_info["unit"] = "hour"
                 elif token.lower_ in ["minute", "minutes", "min", "mins"]:
                     time_info["unit"] = "minute"
                 elif token.lower_ in ["second", "seconds", "sec", "secs"]:
                     time_info["unit"] = "second"
+
+            # Combine adjacent numbers and fractions (e.g., "1" + "½" = 1.5)
+            if len(numbers) == 2:
+                # Mixed number: "1 ½"
+                try:
+                    whole = _parse_number_with_fraction(numbers[0])
+                    frac = _parse_number_with_fraction(numbers[1])
+                    time_info["duration"] = whole + frac
+                except (ValueError, KeyError):
+                    time_info["duration"] = _parse_number_with_fraction(numbers[0])
+            elif len(numbers) == 1:
+                time_info["duration"] = _parse_number_with_fraction(numbers[0])
 
             if time_info:
                 return time_info
@@ -319,9 +494,11 @@ def split_into_sentences_with_spacy(text: str, nlp: spacy.language.Language) -> 
         if ", then" in sent_text.lower() or ", and then" in sent_text.lower():
             parts = re.split(r",\s+(and\s+)?then\s+", sent_text, flags=re.IGNORECASE)
             for i, part in enumerate(parts):
-                if i > 0 and not part[0].isupper():
+                if part is None:
+                    continue
+                if i > 0 and part and part[0].isalpha() and not part[0].isupper():
                     part = part[0].upper() + part[1:]
-                if part.strip() and part.lower() not in ["then", "and then"]:
+                if part and part.strip() and part.lower() not in ["then", "and then"]:
                     sentences.append(part.strip())
         else:
             sentences.append(sent_text)
