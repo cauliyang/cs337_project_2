@@ -207,10 +207,40 @@ class ActionShowCurrentStep(Action):
         if not time_info:
             return ""
 
+        # Normalize unit abbreviations to full names for consistent handling
+        def normalize_unit(unit: str) -> str:
+            """Normalize unit to full name, handling abbreviations."""
+            if not unit:
+                return "minute"
+            unit_lower = unit.lower()
+            # Map abbreviations to full names
+            unit_map = {
+                "hr": "hour",
+                "hrs": "hour",
+                "h": "hour",
+                "min": "minute",
+                "mins": "minute",
+                "m": "minute",
+                "sec": "second",
+                "secs": "second",
+                "s": "second",
+            }
+            # Get full name or use as-is if already full name
+            normalized = unit_map.get(unit_lower, unit_lower)
+            # Pluralize if needed
+            if normalized == "hour":
+                return "hours"
+            elif normalized == "minute":
+                return "minutes"
+            elif normalized == "second":
+                return "seconds"
+            # If already plural, return as-is
+            return normalized
+
         # Handle time range
         if "duration_min" in time_info and "duration_max" in time_info:
             unit = time_info.get("unit", "minute")
-            unit_display = unit if unit.endswith("s") else f"{unit}s"
+            unit_display = normalize_unit(unit)
             return f"{time_info['duration_min']}-{time_info['duration_max']} {unit_display}"
 
         # Handle single duration
@@ -222,7 +252,7 @@ class ActionShowCurrentStep(Action):
             else:
                 # Numeric duration
                 unit = time_info.get("unit", "minute")
-                unit_display = unit if unit.endswith("s") else f"{unit}s"
+                unit_display = normalize_unit(unit)
                 return f"{duration} {unit_display}"
 
         # Fallback: show all key-value pairs
@@ -922,7 +952,7 @@ class ActionExternalSearch(Action):
                 step = steps[current_step - 1]
 
                 # Check if asking about tools (but not "how to" questions)
-                if any(word in message_text for word in ["tool", "tools", "equipment", "utensil"]):
+                if any(word in message_text for word in ["tool", "tools", "equipment", "utensil", "what tool", "which tool"]):
                     tools = step.get("tools", [])
                     if tools:
                         message = f"🔧 For step {current_step}, you'll need:\n"
@@ -930,9 +960,15 @@ class ActionExternalSearch(Action):
                             message += f"  {i}. {tool}\n"
                         dispatcher.utter_message(text=message)
                         return []
+                    else:
+                        # No tools found in step, but still answer from recipe context
+                        dispatcher.utter_message(
+                            text=f"No specific tools mentioned in step {current_step}. Check the step description for details."
+                        )
+                        return []
 
                 # Check if asking about methods/techniques (but not "how to" questions)
-                if any(word in message_text for word in ["method", "technique", "what method"]):
+                if any(word in message_text for word in ["method", "technique", "what method", "which method", "what technique"]):
                     methods = step.get("methods", [])
                     if methods:
                         message = f"👨‍🍳 Methods used in step {current_step}:\n"
@@ -940,6 +976,35 @@ class ActionExternalSearch(Action):
                             message += f"  {i}. {method}\n"
                         message += f"\nStep description: {step.get('description', '')}"
                         dispatcher.utter_message(text=message)
+                        return []
+                    else:
+                        # No methods found, but still answer from recipe context
+                        dispatcher.utter_message(
+                            text=f"No specific methods identified in step {current_step}. Check the step description for details."
+                        )
+                        return []
+
+                # Check if asking about ingredients in current step
+                if any(word in message_text for word in ["ingredient", "ingredients", "what ingredient", "which ingredient"]):
+                    step_ingredients = step.get("ingredients", [])
+                    if step_ingredients:
+                        message = f"🥘 Ingredients used in step {current_step}:\n"
+                        for i, ing in enumerate(step_ingredients, 1):
+                            name = ing.get("name", "")
+                            quantity = ing.get("quantity", "")
+                            unit = ing.get("unit", "")
+                            if quantity or unit:
+                                ing_str = f"{quantity} {unit}".strip() if unit else quantity
+                                message += f"  {i}. {name} ({ing_str})\n"
+                            else:
+                                message += f"  {i}. {name}\n"
+                        dispatcher.utter_message(text=message)
+                        return []
+                    else:
+                        # No ingredients found in step
+                        dispatcher.utter_message(
+                            text=f"No specific ingredients mentioned in step {current_step}. Check the step description for details."
+                        )
                         return []
 
         # If not found in recipe data, fall back to external search

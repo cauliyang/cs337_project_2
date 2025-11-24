@@ -21,10 +21,10 @@ from .tools import extract_tools_from_text
 # Regular expressions for time extraction
 TIME_PATTERNS = [
     re.compile(
-        r"(\d+(?:\.\d+)?)\s*(?:to|\-)\s*(\d+(?:\.\d+)?)\s*(hour|hr|minute|min|second|sec)s?", flags=re.IGNORECASE
+        r"(\d+(?:\.\d+)?)\s*(?:to|\-)\s*(\d+(?:\.\d+)?)\s*(hour|hr|hours|hrs|minute|min|minutes|mins|second|sec|seconds|secs)s?", flags=re.IGNORECASE
     ),  # "2-3 hours"
-    re.compile(r"(\d+(?:\.\d+)?)\s*(hour|hr|minute|min|second|sec)s?", flags=re.IGNORECASE),  # "30 minutes"
-    re.compile(r"for\s+(\d+(?:\.\d+)?)\s*(hour|hr|minute|min|second|sec)s?", flags=re.IGNORECASE),  # "for 30 minutes"
+    re.compile(r"(?:about|approximately|around|for)\s+(\d+(?:\.\d+)?)\s*(hour|hr|hours|hrs|minute|min|minutes|mins|second|sec|seconds|secs)s?", flags=re.IGNORECASE),  # "about 1 hour", "for 30 minutes"
+    re.compile(r"(\d+(?:\.\d+)?)\s*(hour|hr|hours|hrs|minute|min|minutes|mins|second|sec|seconds|secs)s?", flags=re.IGNORECASE),  # "30 minutes", "1 hour"
 ]
 
 # Regular expressions for temperature extraction
@@ -68,13 +68,28 @@ def extract_time_from_text(text: str, use_spacy: bool = True) -> dict[str, str |
     time_info: dict[str, str | int] = {}
     text_lower = text.lower()
 
+    # Normalize unit to singular form for consistent storage
+    def normalize_unit_to_singular(unit: str) -> str:
+        """Normalize unit to singular form."""
+        if not unit:
+            return "minute"
+        unit_lower = unit.lower()
+        # Map to singular forms
+        if unit_lower in ["hour", "hours", "hr", "hrs", "h"]:
+            return "hour"
+        elif unit_lower in ["minute", "minutes", "min", "mins", "m"]:
+            return "minute"
+        elif unit_lower in ["second", "seconds", "sec", "secs", "s"]:
+            return "second"
+        return unit_lower
+
     # Check for range patterns first (e.g., "2-3 hours")
     range_match = re.search(TIME_PATTERNS[0], text_lower)
     if range_match:
         min_val, max_val, unit = range_match.groups()
         time_info["duration_min"] = int(float(min_val))
         time_info["duration_max"] = int(float(max_val))
-        time_info["unit"] = unit
+        time_info["unit"] = normalize_unit_to_singular(unit)
         return time_info
 
     # Check for single value patterns
@@ -84,7 +99,7 @@ def extract_time_from_text(text: str, use_spacy: bool = True) -> dict[str, str |
             if len(match.groups()) == 2:
                 value, unit = match.groups()
                 time_info["duration"] = int(float(value))
-                time_info["unit"] = unit
+                time_info["unit"] = normalize_unit_to_singular(unit)
             return time_info
 
     # Check for qualitative time descriptions
