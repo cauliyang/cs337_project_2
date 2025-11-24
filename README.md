@@ -80,29 +80,3 @@ uv add requests
 # run the linter before pushing
 make lint
 ```
-
-## TODO
-
-- [ ] make chatbot answer which tool is used in the step instead of searching the web
-- [ ] make chatbot answer which ingredient is used in the step instead of searching the web
-- [ ] make chatbot answer which method is used in the step instead of searching the web
-- [ ] make chatbot answer which time is used in the step instead of searching the web
-- [x] add voice support
-- [ ] add slack integration
-- [x] use spacy to parse the relationship
-- [x] fix failing cases
-- [x] Make web query trigger correctly
-- [ ] Make Rosa trigger how questions
-- [ ] Integrate with Slack
-- [ ] Record a demo video
-
-## Problem Cases to Fix
-
-recipe url: https://www.allrecipes.com/recipe/20096/cheesy-ham-and-hash-brown-casserole/
-wrong hour parsing in step 7:
-
-```
-Bake in the preheated oven until bubbly and lightly brown, about 1 hour.
-⏱️  Time: 1 minutes
-🔧 Tools: oven
-```
