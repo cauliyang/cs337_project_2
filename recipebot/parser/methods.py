@@ -71,6 +71,9 @@ METHOD_EXCLUDE_WORDS = {
     "large",
     "small",
     "medium",
+    "cream",  # Often part of "sour cream", "heavy cream" (ingredient, not method)
+    "hash",  # Part of "hash browns"
+    "sour",  # Part of "sour cream"
 }
 
 # Secondary/preparation methods (supplemental actions)
@@ -144,8 +147,6 @@ SECONDARY_METHODS = {
     "blending",
     "puree",
     "pureeing",
-    "cream",
-    "creaming",
     "knead",
     "kneading",
     "toss",
@@ -320,7 +321,7 @@ def _extract_methods_with_spacy(text: str) -> tuple[list[str], list[str]]:
     secondary_matcher.add("SECONDARY_METHOD", secondary_patterns)
 
     # Track spans to avoid overlapping matches
-    matched_spans = set()
+    matched_spans: set[tuple[int, int]] = set()
 
     # Find primary methods (longer phrases first)
     primary_matches = primary_matcher(doc)
@@ -361,6 +362,23 @@ def _extract_methods_with_spacy(text: str) -> tuple[list[str], list[str]]:
 
             # Skip excluded words
             if lemma in METHOD_EXCLUDE_WORDS or lower in METHOD_EXCLUDE_WORDS:
+                continue
+
+            # Additional context check: skip if token is part of a compound noun (ingredient)
+            # Check if preceded/followed by other nouns (likely ingredient name)
+            is_ingredient_part = False
+            if token.i > 0:
+                prev_token = doc[token.i - 1]
+                # "sour cream", "hash browns"
+                if prev_token.pos_ in ["ADJ", "NOUN"] and not prev_token.is_stop:
+                    is_ingredient_part = True
+            if token.i < len(doc) - 1:
+                next_token = doc[token.i + 1]
+                # "cream cheese", "mix together"
+                if next_token.pos_ == "NOUN" and next_token.lower_ not in ["together", "well", "until"]:
+                    is_ingredient_part = True
+
+            if is_ingredient_part:
                 continue
 
             # Check if verb lemma is a method

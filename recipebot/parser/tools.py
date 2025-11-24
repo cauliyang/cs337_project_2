@@ -222,8 +222,8 @@ def _extract_tools_with_spacy(text: str) -> list[str]:
     """
     nlp = get_nlp()
     doc = nlp(text)
-    found_tools = []
-    seen = set()
+    found_tools: list[str] = []
+    seen: set[str] = set()
 
     # Create phrase matcher for tools
     tool_matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
@@ -237,7 +237,10 @@ def _extract_tools_with_spacy(text: str) -> list[str]:
 
     # Find explicit tool mentions (prioritize longer matches)
     matches = tool_matcher(doc)
-    for _match_id, start, end in matches:
+    # Sort matches by length (longest first) to prioritize specific tools
+    sorted_matches = sorted(matches, key=lambda m: m[2] - m[1], reverse=True)
+
+    for _match_id, start, end in sorted_matches:
         span_range = (start, end)
         tool = doc[start:end].text.lower()
 
@@ -248,7 +251,14 @@ def _extract_tools_with_spacy(text: str) -> list[str]:
                 is_substring = True
                 break
 
-        if tool not in seen and not is_substring:
+        # Also check reverse: don't add if existing tool is substring of this tool
+        contains_existing = False
+        for existing_tool in found_tools:
+            if existing_tool != tool and existing_tool in tool:
+                contains_existing = True
+                break
+
+        if tool not in seen and not is_substring and not contains_existing:
             found_tools.append(tool)
             seen.add(tool)
             matched_spans.add(span_range)

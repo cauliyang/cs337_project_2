@@ -8,10 +8,6 @@ from rasa_sdk.events import SlotSet
 from recipebot.parser import parse_recipe
 from recipebot.search import search_duckduckgo, search_youtube
 
-# Note: All recipe parsing now uses spaCy optimizations by default
-# for improved accuracy in extracting ingredients, tools, methods,
-# times, and temperatures from recipe directions.
-
 
 class ActionFetchRecipe(Action):
     """Fetch and parse recipe from URL."""
@@ -541,6 +537,116 @@ class ActionAnswerQuantity(Action):
         return [SlotSet("last_mentioned_ingredient", name)]
 
 
+class ActionAnswerTool(Action):
+    """Answer tool-related questions for current or specific step."""
+
+    def name(self) -> str:
+        return "action_answer_tool"
+
+    def run(
+        self,
+        dispatcher,
+        tracker: Tracker,
+        domain: dict[str, Any],
+    ) -> list[dict[str, Any]]:
+        """Execute the action."""
+        recipe_data = tracker.get_slot("recipe_data")
+        current_step = tracker.get_slot("current_step") or 0
+
+        if not recipe_data:
+            dispatcher.utter_message(text="No recipe loaded. Please provide a recipe URL first.")
+            return []
+
+        # Extract step number if specified
+        step_number = None
+        for entity in tracker.latest_message.get("entities", []):
+            if entity.get("entity") == "step_number":
+                try:
+                    step_number = int(entity.get("value"))
+                except ValueError:
+                    continue
+
+        # Use specified step or current step
+        target_step = step_number if step_number else current_step
+
+        if target_step < 1:
+            dispatcher.utter_message(text="Please specify which step, or navigate to a step first.")
+            return []
+
+        steps = recipe_data.get("steps", [])
+        if target_step > len(steps):
+            dispatcher.utter_message(text=f"Step {target_step} doesn't exist. Recipe has {len(steps)} steps.")
+            return []
+
+        step = steps[target_step - 1]
+        tools = step.get("tools", [])
+
+        if tools:
+            message = f"🔧 Tools needed for step {target_step}:\n"
+            for i, tool in enumerate(tools, 1):
+                message += f"  {i}. {tool}\n"
+            dispatcher.utter_message(text=message)
+        else:
+            dispatcher.utter_message(text=f"No specific tools are required for step {target_step}.")
+
+        return []
+
+
+class ActionAnswerMethod(Action):
+    """Answer cooking method questions for current or specific step."""
+
+    def name(self) -> str:
+        return "action_answer_method"
+
+    def run(
+        self,
+        dispatcher,
+        tracker: Tracker,
+        domain: dict[str, Any],
+    ) -> list[dict[str, Any]]:
+        """Execute the action."""
+        recipe_data = tracker.get_slot("recipe_data")
+        current_step = tracker.get_slot("current_step") or 0
+
+        if not recipe_data:
+            dispatcher.utter_message(text="No recipe loaded. Please provide a recipe URL first.")
+            return []
+
+        # Extract step number if specified
+        step_number = None
+        for entity in tracker.latest_message.get("entities", []):
+            if entity.get("entity") == "step_number":
+                try:
+                    step_number = int(entity.get("value"))
+                except ValueError:
+                    continue
+
+        # Use specified step or current step
+        target_step = step_number if step_number else current_step
+
+        if target_step < 1:
+            dispatcher.utter_message(text="Please specify which step, or navigate to a step first.")
+            return []
+
+        steps = recipe_data.get("steps", [])
+        if target_step > len(steps):
+            dispatcher.utter_message(text=f"Step {target_step} doesn't exist. Recipe has {len(steps)} steps.")
+            return []
+
+        step = steps[target_step - 1]
+        methods = step.get("methods", [])
+
+        if methods:
+            message = f"👨‍🍳 Cooking methods for step {target_step}:\n"
+            for i, method in enumerate(methods, 1):
+                message += f"  {i}. {method}\n"
+            dispatcher.utter_message(text=message)
+        else:
+            dispatcher.utter_message(text=f"No specific cooking methods identified for step {target_step}.")
+
+        return []
+
+
 class ActionAnswerSubstitution(Action):
     """Answer ingredient substitution questions."""
 
@@ -554,6 +660,8 @@ class ActionAnswerSubstitution(Action):
         domain: dict[str, Any],
     ) -> list[dict[str, Any]]:
         """Execute the action."""
+        recipe_data = tracker.get_slot("recipe_data")
+
         # Extract ingredient from entities
         ingredient_name = None
         for entity in tracker.latest_message.get("entities", []):
@@ -565,23 +673,42 @@ class ActionAnswerSubstitution(Action):
             dispatcher.utter_message(text="Which ingredient do you want to substitute?")
             return []
 
+        # First, check if ingredient exists in current recipe
+        if recipe_data:
+            ingredients = recipe_data.get("ingredients", [])
+            found_in_recipe = False
+            for ing in ingredients:
+                if ingredient_name.lower() in ing.get("name", "").lower():
+                    found_in_recipe = True
+                    ingredient_name = ing.get("name", ingredient_name)  # Use exact name from recipe
+                    break
+
+            if found_in_recipe:
+                dispatcher.utter_message(
+                    text=f"Looking for substitution options for {ingredient_name} from your recipe..."
+                )
+
+        # External search for substitutions
         search_term = ingredient_name.strip().replace(" ", "+")
         youtube_results = search_youtube(search_term, max_results=3)
         duckduckgo_results = search_duckduckgo(search_term, search_type="text", max_results=3)
 
+        message_parts = []
         if youtube_results:
-            message = f"🔍 For substitutions of {ingredient_name}, check:\n• YouTube: {youtube_results[0].url}"
-            dispatcher.utter_message(text=message)
+            message_parts.append(f"🔍 For substitutions of {ingredient_name}:\n• YouTube: {youtube_results[0].url}")
         if duckduckgo_results:
-            message = f"\n• Web search: {duckduckgo_results[0].url}"
-            dispatcher.utter_message(text=message)
+            message_parts.append(f"• Web search: {duckduckgo_results[0].url}")
 
-        dispatcher.utter_message(text=message)
+        if message_parts:
+            dispatcher.utter_message(text="\n".join(message_parts))
+        else:
+            dispatcher.utter_message(text=f"Couldn't find substitution information for {ingredient_name}.")
+
         return []
 
 
 class ActionExternalSearch(Action):
-    """Handle how-to and definition questions with external search."""
+    """Handle how-to and definition questions - check recipe first, then external search."""
 
     def name(self) -> str:
         return "action_external_search"
@@ -593,6 +720,42 @@ class ActionExternalSearch(Action):
         domain: dict[str, Any],
     ) -> list[dict[str, Any]]:
         """Execute the action."""
+        recipe_data = tracker.get_slot("recipe_data")
+        current_step = tracker.get_slot("current_step") or 0
+        message_text = tracker.latest_message.get("text", "").lower()
+
+        # Check if "how to" question - these should always get external tutorials
+        is_how_to_question = any(phrase in message_text for phrase in ["how to", "how do i", "how can i"])
+
+        # If it's a "how to" question, skip recipe check and go straight to external search
+        # Users asking "how to" want detailed tutorials, not just method names
+        if not is_how_to_question and recipe_data and current_step > 0:
+            steps = recipe_data.get("steps", [])
+            if current_step <= len(steps):
+                step = steps[current_step - 1]
+
+                # Check if asking about tools (but not "how to" questions)
+                if any(word in message_text for word in ["tool", "tools", "equipment", "utensil"]):
+                    tools = step.get("tools", [])
+                    if tools:
+                        message = f"🔧 For step {current_step}, you'll need:\n"
+                        for i, tool in enumerate(tools, 1):
+                            message += f"  {i}. {tool}\n"
+                        dispatcher.utter_message(text=message)
+                        return []
+
+                # Check if asking about methods/techniques (but not "how to" questions)
+                if any(word in message_text for word in ["method", "technique", "what method"]):
+                    methods = step.get("methods", [])
+                    if methods:
+                        message = f"👨‍🍳 Methods used in step {current_step}:\n"
+                        for i, method in enumerate(methods, 1):
+                            message += f"  {i}. {method}\n"
+                        message += f"\nStep description: {step.get('description', '')}"
+                        dispatcher.utter_message(text=message)
+                        return []
+
+        # If not found in recipe data, fall back to external search
         # Extract search term from entities
         search_term = None
         for entity in tracker.latest_message.get("entities", []):
@@ -600,29 +763,35 @@ class ActionExternalSearch(Action):
                 search_term = entity.get("value")
                 break
 
-        # TODO: improve the extraction of search term from message
         # If no entity, try to extract from message
         if not search_term:
-            message_text = tracker.latest_message.get("text", "")
             # Simple extraction: remove common question words
-            search_term = message_text.replace("how do I ", "").replace("how to ", "")
+            search_term = message_text.replace("how do i ", "").replace("how to ", "")
             search_term = search_term.replace("what is ", "").replace("what's ", "")
-            search_term = search_term.strip("?")
+            search_term = search_term.replace("which ", "").replace("what ", "")
+            search_term = search_term.strip("?").strip()
 
-        if not search_term:
+        if not search_term or len(search_term) < 3:
             dispatcher.utter_message(text="What would you like to learn about?")
             return []
 
-        search_term = search_term.strip().replace(" ", "+")
-        results = search_youtube(search_term, max_results=3)
-        if results:
-            message = f"🔍 To learn about '{search_term}':\n• YouTube tutorial: {results[0].url}"
-            dispatcher.utter_message(text=message)
+        # Perform external search
+        dispatcher.utter_message(text=f"🔍 Searching for information about '{search_term}'...")
+        search_term_encoded = search_term.replace(" ", "+")
 
-        results = search_duckduckgo(search_term, search_type="text", max_results=3)
+        message_parts = []
+        results = search_youtube(search_term_encoded, max_results=3)
         if results:
-            message = f"\n• Web search: {results[0].url}"
-            dispatcher.utter_message(text=message)
+            message_parts.append(f"• YouTube tutorial: {results[0].url}")
+
+        results = search_duckduckgo(search_term_encoded, search_type="text", max_results=3)
+        if results:
+            message_parts.append(f"• Web search: {results[0].url}")
+
+        if message_parts:
+            dispatcher.utter_message(text="\n".join(message_parts))
+        else:
+            dispatcher.utter_message(text="Sorry, couldn't find relevant information.")
 
         return []
 
