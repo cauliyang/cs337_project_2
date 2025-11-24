@@ -8,17 +8,28 @@ def extract_title_from_url(url: str) -> str:
     """Extract recipe title from URL."""
     # Extract last part of URL path and clean it up
     path_parts = url.rstrip("/").split("/")
-    # Find the recipe name (usually after 'recipe/')
-    for i, part in enumerate(path_parts):
-        if part == "recipe" and i + 1 < len(path_parts):
-            # Get the next part after 'recipe/'
-            recipe_slug = path_parts[i + 2] if i + 2 < len(path_parts) else path_parts[i + 1]
-            # Remove ID numbers
-            recipe_slug = "".join(c for c in recipe_slug if not c.isdigit())
-            # Convert dashes/underscores to spaces and title case
-            title = recipe_slug.replace("-", " ").replace("_", " ").strip()
-            return title.title()
-    return "Unknown Recipe"
+    try:
+        # Look for recipe name after 'recipe' in URL
+        if "recipe" in path_parts:
+            idx = path_parts.index("recipe")
+            # Find the next part after 'recipe' or skip to next index if more available
+            if idx + 1 < len(path_parts):
+                slug = path_parts[idx + 2] if idx + 2 < len(path_parts) else path_parts[idx + 1]
+                # Remove numeric only fragments
+                slug = "".join(c for c in slug if not c.isdigit())
+                title = slug.replace("-", " ").replace("_", " ").strip()
+                if title:
+                    return title.title()
+        # Fallback: use last path part (excluding trailing ID if present)
+        last = path_parts[-1]
+        parts = last.split("-")
+        # Remove any trailing numeric "id" fragments
+        if parts and parts[-1].isdigit():
+            parts = parts[:-1]
+        title = " ".join(parts).replace("_", " ").strip()
+        return title.title() if title else "Unknown Recipe"
+    except Exception:
+        return "Unknown Recipe"
 
 
 def scrape_recipe(url):
@@ -26,6 +37,8 @@ def scrape_recipe(url):
         i, d = scrape_allrecipes(url)
     elif "seriouseats.com" in url:
         i, d = scrape_seriouseats(url)
+    else:
+        raise ValueError(f"Unsupported recipe URL: {url}")
     return i, d
 
 

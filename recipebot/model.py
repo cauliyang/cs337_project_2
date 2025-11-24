@@ -6,9 +6,10 @@ from pydantic import BaseModel, Field
 class Ingredient(BaseModel):
     name: str | None = Field(default=None, description="The name of the ingredient")
     quantity: str | None = Field(default=None, description="The quantity of the ingredient")
-    unit: str | None = None
-    preparation: str | None = None
-    misc: str | None = None
+    unit: str | None = Field(default=None, description="The unit of the ingredient")
+    preparation: str | None = Field(default=None, description="The preparation of the ingredient")
+    misc: str | None = Field(default=None, description="The additional information of the ingredient")
+
 
 # {
 #     "step_number": int,
@@ -42,6 +43,7 @@ class Step(BaseModel):
 
 
 class Recipe(BaseModel):
+    url: str = Field(..., description="The URL of the recipe")
     title: str = Field(..., description="The title of the recipe")
     ingredients: list[Ingredient] = Field(..., description="The ingredients of the recipe")
     directions: list[str] = Field(..., description="The directions of the recipe")

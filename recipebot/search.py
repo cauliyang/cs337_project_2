@@ -15,7 +15,14 @@ class SearchResult(BaseModel):
     reponse: dict[str, str] | None = Field(default=None, description="The response of searching item")
 
 
+def modify_query(query: str) -> str:
+    """Modify the query to make it more specific."""
+    return query + "related cooking recipe"
+
+
 def search_youtube(query, max_results=5):
+    query = modify_query(query)
+
     ydl_opts = {
         "quiet": True,
         "no_warnings": True,
@@ -109,6 +116,8 @@ def search_duckduckgo(
             'uploader': 'In The Kitchen With Matt'
             }
     """
+    query = modify_query(query)
+
     match search_type:
         case "text":
             return [

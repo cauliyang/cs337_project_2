@@ -33,8 +33,18 @@ def ingredients():
 
 
 @pytest.fixture
-def urls():
-    return [
-        "https://www.allrecipes.com/recipe/24074/alysias-basic-meat-lasagna/",
-        "https://www.seriouseats.com/pecan-pie-cheesecake-recipe-11843450",
-    ]
+def urls() -> dict[str, list[str]]:
+    return {
+        "allrecipes": ["https://www.allrecipes.com/recipe/24074/alysias-basic-meat-lasagna/"],
+        "seriouseats": ["https://www.seriouseats.com/pecan-pie-cheesecake-recipe-11843450"],
+    }
+
+
+@pytest.fixture
+def allrecipes_url(urls) -> list[str]:
+    return urls["allrecipes"]
+
+
+@pytest.fixture
+def seriouseats_url(urls) -> list[str]:
+    return urls["seriouseats"]

@@ -65,7 +65,7 @@ kill -9 $(lsof -ti:5055)
 ```
 
 **No styling?**
-Make sure `chat.html`, `style.css`, and `script.js` are in the same folder.
+Make sure `index.html`, `style.css`, and `script.js` are in the same folder.
 
 ---
 
