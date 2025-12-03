@@ -9,8 +9,6 @@ classifiers = [
 ]
 license = { text = "MIT" }
 dependencies = [
-  "nltk>=3.9.2",
-  "thefuzz>=0.22.1",
   "requests>=2.32.5",
   "beautifulsoup4>=4.14.2",
   "rich>=14.2.0",

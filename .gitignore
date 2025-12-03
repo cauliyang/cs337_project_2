@@ -11,3 +11,5 @@ wheels/
 .env
 examples
 .rasa
+docs
+rasa/credentials.yml
