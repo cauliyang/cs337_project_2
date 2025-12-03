@@ -13,19 +13,32 @@ dependencies = [
   "beautifulsoup4>=4.14.2",
   "rich>=14.2.0",
   "types-requests>=2.32.4.20250913",
-  "python-dotenv>=1.2.1",
   "yt-dlp>=2025.11.12",
   "ddgs>=9.9.1",
+  "typer>=0.20.0",
+  "pydantic>=1.10.9",
+]
+requires-python = ">= 3.10"
+
+[tool.uv]
+conflicts = [[{ extra = "llm" }, { extra = "rasa" }]]
+package = true
+
+[project.optional-dependencies]
+llm = [
+  "fastapi>=0.123.5",
+  "logfire>=4.15.1",
+  "python-dotenv>=1.2.1",
+  "pydantic-ai[examples]>=1.26.0",
+]
+rasa = [
   "pydantic<1.10.10",
-  "rasa>=3.6.21",
   "sqlalchemy<2.0",
-  "packaging<22.0",
+  "rasa>=3.6.21",
   "number-parser>=0.3.2",
   "spacy>=3.8.11",
   "en-core-web-md @ https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.8.0/en_core_web_md-3.8.0-py3-none-any.whl",
-  "typer>=0.20.0",
 ]
-requires-python = ">= 3.10"
 
 [dependency-groups]
 dev = [
@@ -66,6 +79,3 @@ select = [
   "B",  # flake8-bugbear
   "UP", # pyupgrade
 ]
-
-[tool.uv]
-package = true
