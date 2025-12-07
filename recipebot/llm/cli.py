@@ -63,7 +63,7 @@ def main():
         assistant = RecipeAssistant()
     except ValueError as e:
         print_error(str(e))
-        console.print("\n[dim]Make sure GEMINI_API_KEY is set in gemini.env[/dim]")
+        console.print("\n[dim]Make sure GEMINI_API_KEY is set in .env[/dim]")
         sys.exit(1)
 
     console.print("\n[dim]Ready! Provide a recipe URL or ask a question.[/dim]\n")
