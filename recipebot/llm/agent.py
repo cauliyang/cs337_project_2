@@ -1,7 +1,6 @@
 """LLM-only recipe assistant using Google Gemini 2.5 Flash Lite."""
 
 import os
-from typing import Any
 
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -9,7 +8,7 @@ from dotenv import load_dotenv
 from recipebot.crawler import extract_title_from_url, scrape_recipe
 
 # Load environment variables
-load_dotenv("gemini.env")
+load_dotenv(".env")
 
 # Configure Gemini API
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -20,10 +19,10 @@ if GEMINI_API_KEY:
 def format_recipe_for_llm(url: str, ingredients: list, directions: list[str]) -> str:
     """Format recipe data as text for LLM context."""
     title = extract_title_from_url(url)
-    
+
     recipe_text = f"RECIPE: {title}\n"
     recipe_text += f"URL: {url}\n\n"
-    
+
     recipe_text += "INGREDIENTS:\n"
     for i, ing in enumerate(ingredients, 1):
         parts = []
@@ -37,13 +36,13 @@ def format_recipe_for_llm(url: str, ingredients: list, directions: list[str]) ->
             parts.append(f"({ing.preparation})")
         if ing.misc:
             parts.append(ing.misc)
-        
+
         recipe_text += f"{i}. {' '.join(parts)}\n"
-    
+
     recipe_text += "\nDIRECTIONS:\n"
     for i, direction in enumerate(directions, 1):
         recipe_text += f"{i}. {direction}\n"
-    
+
     return recipe_text
 
 
@@ -81,7 +80,7 @@ When a recipe is loaded, you will receive:
 
 ## Answering Guidelines
 
-1. **Ingredient Questions**: 
+1. **Ingredient Questions**:
    - Provide exact quantities and units from the recipe
    - If asked about substitutions, suggest appropriate alternatives based on cooking knowledge
    - Clarify preparation requirements (e.g., "chopped", "diced", "at room temperature")
@@ -125,58 +124,55 @@ You: "Yes, you can typically substitute butter for oil in this recipe. Use the s
 User: "What does 'fold' mean?"
 You: "Folding is a gentle mixing technique used to combine ingredients without deflating them. Use a spatula to cut through the center, scrape along the bottom, and bring the mixture up and over the top. Repeat until combined."
 
-Remember: Your goal is to make cooking accessible and enjoyable. Be patient, clear, and helpful in all your responses."""
+Remember: Your goal is to make cooking accessible and enjoyable. Be patient, clear, and helpful in all your responses."""  # noqa: E501
 
 
 class RecipeAssistant:
     """LLM-only recipe assistant using Gemini 2.5 Flash Lite."""
-    
+
     def __init__(self):
         """Initialize the assistant with Gemini model."""
         if not GEMINI_API_KEY:
             raise ValueError("GEMINI_API_KEY not found in environment variables")
-        
+
         # Initialize Gemini model - try gemini-2.5-flash-lite first, then fallbacks
         model_names = [
             "gemini-2.5-flash-lite",
             "gemini-2.0-flash-exp",
             "gemini-1.5-flash",
         ]
-        
+
         self.model = None
         for model_name in model_names:
             try:
-                self.model = genai.GenerativeModel(
-                    model_name=model_name,
-                    system_instruction=SYSTEM_PROMPT
-                )
+                self.model = genai.GenerativeModel(model_name=model_name, system_instruction=SYSTEM_PROMPT)
                 # Test if model works by checking if it's accessible
                 break
             except Exception:
                 continue
-        
+
         if self.model is None:
             raise ValueError(f"Could not initialize any Gemini model. Tried: {', '.join(model_names)}")
-        
+
         # Chat session for maintaining conversation history
         self.chat = None
         self.current_recipe: str | None = None
         self.current_recipe_text: str | None = None
-    
+
     def load_recipe(self, url: str) -> str:
         """Load a recipe from URL and return formatted text."""
         try:
             ingredients, directions = scrape_recipe(url)
             if not ingredients or not directions:
                 raise ValueError(f"Failed to scrape recipe from {url}")
-            
+
             recipe_text = format_recipe_for_llm(url, ingredients, directions)
             self.current_recipe = url
             self.current_recipe_text = recipe_text
-            
+
             # Start new chat session with recipe context
             self.chat = self.model.start_chat(history=[])
-            
+
             # Send recipe context to the model
             prompt = f"Please load this recipe:\n\n{recipe_text}"
             response = self.chat.send_message(
@@ -187,18 +183,18 @@ class RecipeAssistant:
                     top_k=40,
                 ),
             )
-            
+
             acknowledgment = response.text
             return f"Recipe loaded successfully!\n\n{acknowledgment}"
-            
+
         except Exception as e:
             raise ValueError(f"Failed to load recipe: {e}") from e
-    
+
     def ask(self, question: str) -> str:
         """Ask a question about the current recipe."""
         if not self.current_recipe_text or not self.chat:
             return "No recipe loaded. Please provide a recipe URL first."
-        
+
         # Generate response using chat session (maintains history automatically)
         try:
             response = self.chat.send_message(
@@ -209,15 +205,14 @@ class RecipeAssistant:
                     top_k=40,
                 ),
             )
-            
+
             return response.text
-            
+
         except Exception as e:
             return f"Error generating response: {e}"
-    
+
     def reset(self):
         """Reset conversation history and current recipe."""
         self.chat = None
         self.current_recipe = None
         self.current_recipe_text = None
-

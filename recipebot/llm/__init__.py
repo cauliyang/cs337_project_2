@@ -2,5 +2,6 @@
 
 from recipebot.llm.agent import RecipeAssistant
 
-__all__ = ["RecipeAssistant"]
+from . import cli
 
+__all__ = ["RecipeAssistant", "cli"]

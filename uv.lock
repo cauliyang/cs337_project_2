@@ -6367,6 +6367,7 @@ dependencies = [
 [package.optional-dependencies]
 llm = [
     { name = "fastapi" },
+    { name = "google-genai" },
     { name = "google-generativeai" },
     { name = "logfire" },
     { name = "pydantic-ai", extra = ["examples"], marker = "extra == 'extra-9-recipebot-llm'" },
@@ -6398,6 +6399,7 @@ requires-dist = [
     { name = "ddgs", specifier = ">=9.9.1" },
     { name = "en-core-web-md", marker = "extra == 'rasa'", url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.8.0/en_core_web_md-3.8.0-py3-none-any.whl" },
     { name = "fastapi", marker = "extra == 'llm'", specifier = ">=0.123.5" },
+    { name = "google-genai", marker = "extra == 'llm'", specifier = ">=1.53.0" },
     { name = "google-generativeai", marker = "extra == 'llm'", specifier = ">=0.8.0" },
     { name = "logfire", marker = "extra == 'llm'", specifier = ">=4.15.1" },
     { name = "number-parser", specifier = ">=0.3.2" },

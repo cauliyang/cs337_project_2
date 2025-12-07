@@ -4,10 +4,13 @@ import sys
 
 import typer
 from rich.console import Console
+from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.prompt import Prompt
 
 from recipebot.llm.agent import RecipeAssistant
+
+PRINT_USER = False
 
 app = typer.Typer(invoke_without_command=True)
 console = Console()
@@ -60,14 +63,10 @@ def main():
         assistant = RecipeAssistant()
     except ValueError as e:
         print_error(str(e))
-        console.print(
-            "\n[dim]Make sure GEMINI_API_KEY is set in gemini.env[/dim]"
-        )
+        console.print("\n[dim]Make sure GEMINI_API_KEY is set in gemini.env[/dim]")
         sys.exit(1)
 
-    console.print(
-        "\n[dim]Ready! Provide a recipe URL or ask a question.[/dim]\n"
-    )
+    console.print("\n[dim]Ready! Provide a recipe URL or ask a question.[/dim]\n")
 
     while True:
         try:
@@ -78,22 +77,16 @@ def main():
 
             # Handle special commands
             if user_input.lower() in ["quit", "exit", "q"]:
-                console.print(
-                    "\n[bold cyan]Goodbye! Happy cooking! 👨‍🍳[/bold cyan]\n"
-                )
+                console.print("\n[bold cyan]Goodbye! Happy cooking! 👨‍🍳[/bold cyan]\n")
                 break
 
             if user_input.lower() == "reset":
                 assistant.reset()
-                console.print(
-                    "[dim]Conversation reset. Ready for a new recipe![/dim]"
-                )
+                console.print("[dim]Conversation reset. Ready for a new recipe![/dim]")
                 continue
 
             # Check if input looks like a URL
-            if user_input.startswith("http://") or user_input.startswith(
-                "https://"
-            ):
+            if user_input.startswith("http://") or user_input.startswith("https://"):
                 console.print(f"[dim]Loading recipe from: {user_input}[/dim]")
                 try:
                     response = assistant.load_recipe(user_input)
@@ -103,24 +96,20 @@ def main():
             else:
                 # Regular question
                 if not assistant.current_recipe_text:
-                    print_error(
-                        "No recipe loaded. Please provide a recipe URL first."
-                    )
+                    print_error("No recipe loaded. Please provide a recipe URL first.")
                     continue
-
-                print_user(user_input)
+                if PRINT_USER:
+                    print_user(user_input)
                 response = assistant.ask(user_input)
-                print_assistant(response)
+
+                markdown = Markdown(response)
+                print_assistant(markdown)
 
         except KeyboardInterrupt:
-            console.print(
-                "\n\n[bold cyan]Goodbye! Happy cooking! 👨‍🍳[/bold cyan]\n"
-            )
+            console.print("\n\n[bold cyan]Goodbye! Happy cooking! 👨‍🍳[/bold cyan]\n")
             break
         except EOFError:
-            console.print(
-                "\n\n[bold cyan]Goodbye! Happy cooking! 👨‍🍳[/bold cyan]\n"
-            )
+            console.print("\n\n[bold cyan]Goodbye! Happy cooking! 👨‍🍳[/bold cyan]\n")
             break
         except Exception as e:
             print_error(f"Unexpected error: {e}")
@@ -141,4 +130,3 @@ def chat():
 
 if __name__ == "__main__":
     app()
-
