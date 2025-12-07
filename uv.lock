@@ -19,7 +19,8 @@ resolution-markers = [
     "(python_full_version >= '3.13' and platform_machine == 'arm64' and sys_platform == 'darwin' and extra != 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (python_full_version >= '3.13' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'win32' and extra != 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')",
     "(python_full_version == '3.12.*' and platform_machine == 'arm64' and sys_platform == 'darwin' and extra != 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (python_full_version == '3.12.*' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'win32' and extra != 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')",
     "(python_full_version == '3.11.*' and platform_machine == 'arm64' and sys_platform == 'darwin' and extra != 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (python_full_version == '3.11.*' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'win32' and extra != 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')",
-    "python_full_version >= '3.13' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version >= '3.14' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version == '3.13.*' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
     "python_full_version == '3.12.*' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
     "python_full_version == '3.11.*' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
     "python_full_version < '3.11' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
@@ -71,7 +72,8 @@ name = "aiofiles"
 version = "23.2.1"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.13'",
+    "python_full_version >= '3.14'",
+    "python_full_version == '3.13.*'",
     "python_full_version == '3.12.*'",
     "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
@@ -324,7 +326,8 @@ name = "asttokens"
 version = "2.4.1"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.13'",
+    "python_full_version >= '3.14'",
+    "python_full_version == '3.13.*'",
     "python_full_version == '3.12.*'",
     "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
@@ -482,10 +485,14 @@ name = "attrs"
 version = "25.4.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.13'",
-    "python_full_version == '3.12.*'",
-    "python_full_version == '3.11.*'",
-    "python_full_version < '3.11'",
+    "python_full_version >= '3.14' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version == '3.13.*' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version == '3.12.*' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version == '3.11.*' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version < '3.11' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version >= '3.13' and extra != 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version >= '3.11' and python_full_version < '3.13' and extra != 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version < '3.11' and extra != 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/6b/5c/685e6633917e101e5dcb62b9dd76946cbb57c26e133bae9e0cd36033c0a9/attrs-25.4.0.tar.gz", hash = "sha256:16d5969b87f0859ef33a48b35d55ac1be6e42ae49d5e853b597db70c35c57e11", size = 934251, upload-time = "2025-10-06T13:54:44.725Z" }
 wheels = [
@@ -615,7 +622,8 @@ version = "1.2.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy", version = "1.22.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and platform_python_implementation != 'PyPy' and sys_platform == 'Windows' and extra == 'extra-9-recipebot-rasa') or (python_full_version >= '3.11' and platform_python_implementation != 'PyPy' and extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (platform_python_implementation == 'PyPy' and extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (sys_platform != 'Windows' and extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
-    { name = "numpy", version = "1.23.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and platform_python_implementation != 'PyPy' and extra == 'extra-9-recipebot-rasa') or (python_full_version < '3.11' and platform_python_implementation != 'PyPy' and extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (platform_python_implementation == 'PyPy' and extra == 'extra-9-recipebot-rasa') or (sys_platform != 'Windows' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "numpy", version = "1.23.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and platform_python_implementation == 'PyPy') or (python_full_version < '3.11' and platform_python_implementation != 'PyPy' and extra == 'extra-9-recipebot-llm') or (python_full_version < '3.11' and platform_python_implementation != 'PyPy' and extra != 'extra-9-recipebot-rasa') or (python_full_version < '3.11' and sys_platform != 'Windows') or (python_full_version >= '3.11' and extra == 'extra-9-recipebot-rasa') or (sys_platform != 'Windows' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "numpy", version = "2.3.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-9-recipebot-llm') or (python_full_version >= '3.11' and extra != 'extra-9-recipebot-rasa') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/61/aa/0743c994884de83472c854bb534c9edab8d711e1880d4fa194e6d876bb60/blis-1.2.1.tar.gz", hash = "sha256:1066beedbedc2143c22bd28742658de05694afebacde8d8c2d14dd4b5a96765a", size = 2510297, upload-time = "2025-04-01T12:01:56.849Z" }
 wheels = [
@@ -1031,7 +1039,7 @@ name = "cloudpathlib"
 version = "0.23.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11' or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/f4/18/2ac35d6b3015a0c74e923d94fc69baf8307f7c3233de015d69f99e17afa8/cloudpathlib-0.23.0.tar.gz", hash = "sha256:eb38a34c6b8a048ecfd2b2f60917f7cbad4a105b7c979196450c2f541f4d6b4b", size = 53126, upload-time = "2025-10-07T22:47:56.278Z" }
 wheels = [
@@ -1111,7 +1119,8 @@ name = "confection"
 version = "0.1.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pydantic", version = "1.10.9", source = { registry = "https://pypi.org/simple" } },
+    { name = "pydantic", version = "1.10.9", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-9-recipebot-rasa'" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-9-recipebot-llm' or extra != 'extra-9-recipebot-rasa'" },
     { name = "srsly" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/51/d3/57c6631159a1b48d273b40865c315cf51f89df7a9d1101094ef12e3a37c2/confection-0.1.5.tar.gz", hash = "sha256:8e72dd3ca6bd4f48913cd220f10b8275978e740411654b6e8ca6d7008c590f0e", size = 38924, upload-time = "2024-05-31T16:17:01.559Z" }
@@ -1439,8 +1448,8 @@ dependencies = [
     { name = "httpx" },
     { name = "huggingface-hub", version = "0.36.0", source = { registry = "https://pypi.org/simple" } },
     { name = "multiprocess" },
-    { name = "numpy", version = "1.23.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
-    { name = "numpy", version = "2.3.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "numpy", version = "1.23.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "numpy", version = "2.3.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
     { name = "packaging" },
     { name = "pandas" },
     { name = "pyarrow" },
@@ -1992,7 +2001,8 @@ name = "fsspec"
 version = "2025.10.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.13'",
+    "python_full_version >= '3.14'",
+    "python_full_version == '3.13.*'",
     "python_full_version == '3.12.*'",
     "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
@@ -2068,6 +2078,92 @@ wheels = [
 ]
 
 [[package]]
+name = "google-ai-generativelanguage"
+version = "0.6.15"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "google-api-core", version = "2.25.2", source = { registry = "https://pypi.org/simple" }, extra = ["grpc"], marker = "(python_full_version >= '3.14' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "google-api-core", version = "2.28.1", source = { registry = "https://pypi.org/simple" }, extra = ["grpc"], marker = "(python_full_version < '3.14' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "google-auth" },
+    { name = "proto-plus" },
+    { name = "protobuf", version = "5.29.5", source = { registry = "https://pypi.org/simple" } },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/11/d1/48fe5d7a43d278e9f6b5ada810b0a3530bbeac7ed7fcbcd366f932f05316/google_ai_generativelanguage-0.6.15.tar.gz", hash = "sha256:8f6d9dc4c12b065fe2d0289026171acea5183ebf2d0b11cefe12f3821e159ec3", size = 1375443, upload-time = "2025-01-13T21:50:47.459Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7c/a3/67b8a6ff5001a1d8864922f2d6488dc2a14367ceb651bc3f09a947f2f306/google_ai_generativelanguage-0.6.15-py3-none-any.whl", hash = "sha256:5a03ef86377aa184ffef3662ca28f19eeee158733e45d7947982eb953c6ebb6c", size = 1327356, upload-time = "2025-01-13T21:50:44.174Z" },
+]
+
+[[package]]
+name = "google-api-core"
+version = "2.25.2"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.14'",
+]
+dependencies = [
+    { name = "google-auth", marker = "python_full_version >= '3.14'" },
+    { name = "googleapis-common-protos", marker = "python_full_version >= '3.14'" },
+    { name = "proto-plus", marker = "python_full_version >= '3.14'" },
+    { name = "protobuf", version = "5.29.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
+    { name = "requests", marker = "python_full_version >= '3.14'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/09/cd/63f1557235c2440fe0577acdbc32577c5c002684c58c7f4d770a92366a24/google_api_core-2.25.2.tar.gz", hash = "sha256:1c63aa6af0d0d5e37966f157a77f9396d820fba59f9e43e9415bc3dc5baff300", size = 166266, upload-time = "2025-10-03T00:07:34.778Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c8/d8/894716a5423933f5c8d2d5f04b16f052a515f78e815dab0c2c6f1fd105dc/google_api_core-2.25.2-py3-none-any.whl", hash = "sha256:e9a8f62d363dc8424a8497f4c2a47d6bcda6c16514c935629c257ab5d10210e7", size = 162489, upload-time = "2025-10-03T00:07:32.924Z" },
+]
+
+[package.optional-dependencies]
+grpc = [
+    { name = "grpcio", marker = "python_full_version >= '3.14'" },
+    { name = "grpcio-status", marker = "python_full_version >= '3.14'" },
+]
+
+[[package]]
+name = "google-api-core"
+version = "2.28.1"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version == '3.13.*'",
+    "python_full_version == '3.12.*'",
+    "python_full_version == '3.11.*'",
+    "python_full_version < '3.11'",
+]
+dependencies = [
+    { name = "google-auth", marker = "python_full_version < '3.14'" },
+    { name = "googleapis-common-protos", marker = "python_full_version < '3.14'" },
+    { name = "proto-plus", marker = "python_full_version < '3.14'" },
+    { name = "protobuf", version = "5.29.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
+    { name = "requests", marker = "python_full_version < '3.14'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/61/da/83d7043169ac2c8c7469f0e375610d78ae2160134bf1b80634c482fa079c/google_api_core-2.28.1.tar.gz", hash = "sha256:2b405df02d68e68ce0fbc138559e6036559e685159d148ae5861013dc201baf8", size = 176759, upload-time = "2025-10-28T21:34:51.529Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ed/d4/90197b416cb61cefd316964fd9e7bd8324bcbafabf40eef14a9f20b81974/google_api_core-2.28.1-py3-none-any.whl", hash = "sha256:4021b0f8ceb77a6fb4de6fde4502cecab45062e66ff4f2895169e0b35bc9466c", size = 173706, upload-time = "2025-10-28T21:34:50.151Z" },
+]
+
+[package.optional-dependencies]
+grpc = [
+    { name = "grpcio", marker = "python_full_version < '3.14'" },
+    { name = "grpcio-status", marker = "python_full_version < '3.14'" },
+]
+
+[[package]]
+name = "google-api-python-client"
+version = "2.187.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "google-api-core", version = "2.25.2", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "google-api-core", version = "2.28.1", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "google-auth" },
+    { name = "google-auth-httplib2" },
+    { name = "httplib2" },
+    { name = "uritemplate" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/75/83/60cdacf139d768dd7f0fcbe8d95b418299810068093fdf8228c6af89bb70/google_api_python_client-2.187.0.tar.gz", hash = "sha256:e98e8e8f49e1b5048c2f8276473d6485febc76c9c47892a8b4d1afa2c9ec8278", size = 14068154, upload-time = "2025-11-06T01:48:53.274Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/96/58/c1e716be1b055b504d80db2c8413f6c6a890a6ae218a65f178b63bc30356/google_api_python_client-2.187.0-py3-none-any.whl", hash = "sha256:d8d0f6d85d7d1d10bdab32e642312ed572bdc98919f72f831b44b9a9cebba32f", size = 14641434, upload-time = "2025-11-06T01:48:50.763Z" },
+]
+
+[[package]]
 name = "google-auth"
 version = "2.43.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2084,6 +2180,19 @@ wheels = [
 [package.optional-dependencies]
 requests = [
     { name = "requests" },
+]
+
+[[package]]
+name = "google-auth-httplib2"
+version = "0.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "google-auth" },
+    { name = "httplib2" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e0/83/7ef576d1c7ccea214e7b001e69c006bc75e058a3a1f2ab810167204b698b/google_auth_httplib2-0.2.1.tar.gz", hash = "sha256:5ef03be3927423c87fb69607b42df23a444e434ddb2555b73b3679793187b7de", size = 11086, upload-time = "2025-10-30T21:13:16.569Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/44/a7/ca23dd006255f70e2bc469d3f9f0c82ea455335bfd682ad4d677adc435de/google_auth_httplib2-0.2.1-py3-none-any.whl", hash = "sha256:1be94c611db91c01f9703e7f62b0a59bbd5587a95571c7b6fade510d648bc08b", size = 9525, upload-time = "2025-10-30T21:13:15.758Z" },
 ]
 
 [[package]]
@@ -2119,6 +2228,25 @@ wheels = [
 ]
 
 [[package]]
+name = "google-generativeai"
+version = "0.8.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "google-ai-generativelanguage" },
+    { name = "google-api-core", version = "2.25.2", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.14' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "google-api-core", version = "2.28.1", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.14' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "google-api-python-client" },
+    { name = "google-auth" },
+    { name = "protobuf", version = "5.29.5", source = { registry = "https://pypi.org/simple" } },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" } },
+    { name = "tqdm" },
+    { name = "typing-extensions" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6e/40/c42ff9ded9f09ec9392879a8e6538a00b2dc185e834a3392917626255419/google_generativeai-0.8.5-py3-none-any.whl", hash = "sha256:22b420817fb263f8ed520b33285f45976d5b21e904da32b80d4fd20c055123a2", size = 155427, upload-time = "2025-04-17T00:40:00.67Z" },
+]
+
+[[package]]
 name = "google-pasta"
 version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2135,7 +2263,7 @@ name = "googleapis-common-protos"
 version = "1.72.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "protobuf", version = "6.33.1", source = { registry = "https://pypi.org/simple" } },
+    { name = "protobuf", version = "5.29.5", source = { registry = "https://pypi.org/simple" } },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/e5/7b/adfd75544c415c487b33061fe7ae526165241c1ea133f9a9125a56b39fd8/googleapis_common_protos-1.72.0.tar.gz", hash = "sha256:e55a601c1b32b52d7a3e65f43563e2aa61bcd737998ee672ac9b951cd49319f5", size = 147433, upload-time = "2025-11-06T18:29:24.087Z" }
 wheels = [
@@ -2158,8 +2286,8 @@ dependencies = [
     { name = "huggingface-hub", version = "0.36.0", source = { registry = "https://pypi.org/simple" } },
     { name = "jinja2" },
     { name = "markupsafe" },
-    { name = "numpy", version = "1.23.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
-    { name = "numpy", version = "2.3.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "numpy", version = "1.23.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "numpy", version = "2.3.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
     { name = "orjson" },
     { name = "packaging" },
     { name = "pandas" },
@@ -2361,6 +2489,20 @@ wheels = [
 ]
 
 [[package]]
+name = "grpcio-status"
+version = "1.71.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "googleapis-common-protos" },
+    { name = "grpcio" },
+    { name = "protobuf", version = "5.29.5", source = { registry = "https://pypi.org/simple" } },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fd/d1/b6e9877fedae3add1afdeae1f89d1927d296da9cf977eca0eb08fb8a460e/grpcio_status-1.71.2.tar.gz", hash = "sha256:c7a97e176df71cdc2c179cd1847d7fc86cca5832ad12e9798d7fed6b7a1aab50", size = 13677, upload-time = "2025-06-28T04:24:05.426Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/67/58/317b0134129b556a93a3b0afe00ee675b5657f0155509e22fcb853bafe2d/grpcio_status-1.71.2-py3-none-any.whl", hash = "sha256:803c98cb6a8b7dc6dbb785b1111aed739f241ab5e9da0bba96888aa74704cfd3", size = 14424, upload-time = "2025-06-28T04:23:42.136Z" },
+]
+
+[[package]]
 name = "grpclib"
 version = "0.4.8"
 source = { registry = "https://pypi.org/simple" }
@@ -2524,6 +2666,18 @@ wheels = [
 ]
 
 [[package]]
+name = "httplib2"
+version = "0.31.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyparsing" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/52/77/6653db69c1f7ecfe5e3f9726fdadc981794656fcd7d98c4209fecfea9993/httplib2-0.31.0.tar.gz", hash = "sha256:ac7ab497c50975147d4f7b1ade44becc7df2f8954d42b38b3d69c515f531135c", size = 250759, upload-time = "2025-09-11T12:16:03.403Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8c/a2/0d269db0f6163be503775dc8b6a6fa15820cc9fdc866f6ba608d86b721f2/httplib2-0.31.0-py3-none-any.whl", hash = "sha256:b9cd78abea9b4e43a7714c6e0f8b6b8561a6fc1e95d5dbd367f5bf0ef35f5d24", size = 91148, upload-time = "2025-09-11T12:16:01.803Z" },
+]
+
+[[package]]
 name = "httptools"
 version = "0.7.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2607,7 +2761,8 @@ name = "huggingface-hub"
 version = "0.36.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.13'",
+    "python_full_version >= '3.14'",
+    "python_full_version == '3.13.*'",
     "python_full_version == '3.12.*'",
     "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
@@ -3044,7 +3199,8 @@ name = "jsonschema"
 version = "4.25.1"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.13'",
+    "python_full_version >= '3.14'",
+    "python_full_version == '3.13.*'",
     "python_full_version == '3.12.*'",
     "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
@@ -3244,7 +3400,7 @@ dependencies = [
     { name = "opentelemetry-exporter-otlp-proto-http" },
     { name = "opentelemetry-instrumentation" },
     { name = "opentelemetry-sdk" },
-    { name = "protobuf", version = "6.33.1", source = { registry = "https://pypi.org/simple" } },
+    { name = "protobuf", version = "5.29.5", source = { registry = "https://pypi.org/simple" } },
     { name = "rich" },
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "typing-extensions" },
@@ -3735,7 +3891,7 @@ dependencies = [
     { name = "certifi" },
     { name = "click" },
     { name = "grpclib" },
-    { name = "protobuf", version = "6.33.1", source = { registry = "https://pypi.org/simple" } },
+    { name = "protobuf", version = "5.29.5", source = { registry = "https://pypi.org/simple" } },
     { name = "rich" },
     { name = "synchronicity" },
     { name = "toml" },
@@ -3947,7 +4103,8 @@ name = "number-parser"
 version = "0.3.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "attrs", version = "22.1.0", source = { registry = "https://pypi.org/simple" } },
+    { name = "attrs", version = "22.1.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-9-recipebot-rasa'" },
+    { name = "attrs", version = "25.4.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-9-recipebot-llm' or extra != 'extra-9-recipebot-rasa'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/28/c1/1a3ea159327b442d2202fda38845124a51a3abe11637cbd3111479fd815f/number-parser-0.3.2.tar.gz", hash = "sha256:7650e91afd46dec2f40396f62c2babc84645679a1ca8ecdb5292bdd252685d6a", size = 42408, upload-time = "2023-03-28T16:31:37.792Z" }
 wheels = [
@@ -3992,8 +4149,8 @@ resolution-markers = [
     "(python_full_version >= '3.13' and platform_machine == 'arm64' and sys_platform == 'darwin' and extra != 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (python_full_version >= '3.13' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'win32' and extra != 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')",
     "(python_full_version == '3.12.*' and platform_machine == 'arm64' and sys_platform == 'darwin' and extra != 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (python_full_version == '3.12.*' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'win32' and extra != 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')",
     "(python_full_version == '3.11.*' and platform_machine == 'arm64' and sys_platform == 'darwin' and extra != 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (python_full_version == '3.11.*' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'win32' and extra != 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')",
-    "python_full_version == '3.11.*' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
     "python_full_version < '3.11' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version < '3.11' and extra != 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/42/38/775b43da55fa7473015eddc9a819571517d9a271a9f8134f68fb9be2f212/numpy-1.23.5.tar.gz", hash = "sha256:1b1766d6f397c18153d40015ddfc79ddb715cabadc04d2d228d4e5a8bc4ded1a", size = 10731755, upload-time = "2022-11-20T01:31:41.068Z" }
 wheels = [
@@ -4016,8 +4173,12 @@ name = "numpy"
 version = "2.3.5"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.13'",
-    "python_full_version == '3.12.*'",
+    "python_full_version >= '3.14' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version == '3.13.*' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version == '3.12.*' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version == '3.11.*' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version >= '3.13' and extra != 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version >= '3.11' and python_full_version < '3.13' and extra != 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/76/65/21b3bc86aac7b8f2862db1e808f1ea22b028e30a225a34a5ede9bf8678f2/numpy-2.3.5.tar.gz", hash = "sha256:784db1dcdab56bf0517743e746dfb0f885fc68d948aba86eeec2cba234bdf1c0", size = 20584950, upload-time = "2025-11-16T22:52:42.067Z" }
 wheels = [
@@ -4290,7 +4451,7 @@ name = "opentelemetry-proto"
 version = "1.38.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "protobuf", version = "6.33.1", source = { registry = "https://pypi.org/simple" } },
+    { name = "protobuf", version = "5.29.5", source = { registry = "https://pypi.org/simple" } },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/51/14/f0c4f0f6371b9cb7f9fa9ee8918bfd59ac7040c7791f1e6da32a1839780d/opentelemetry_proto-1.38.0.tar.gz", hash = "sha256:88b161e89d9d372ce723da289b7da74c3a8354a8e5359992be813942969ed468", size = 46152, upload-time = "2025-10-16T08:36:01.612Z" }
 wheels = [
@@ -4449,8 +4610,8 @@ name = "pandas"
 version = "2.3.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy", version = "1.23.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
-    { name = "numpy", version = "2.3.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "numpy", version = "1.23.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "numpy", version = "2.3.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-9-recipebot-llm') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
     { name = "python-dateutil" },
     { name = "pytz" },
     { name = "tzdata" },
@@ -4572,7 +4733,8 @@ name = "pillow"
 version = "11.3.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.13'",
+    "python_full_version >= '3.14'",
+    "python_full_version == '3.13.*'",
     "python_full_version == '3.12.*'",
     "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
@@ -5025,6 +5187,18 @@ wheels = [
 ]
 
 [[package]]
+name = "proto-plus"
+version = "1.26.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "protobuf", version = "5.29.5", source = { registry = "https://pypi.org/simple" } },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f4/ac/87285f15f7cce6d4a008f33f1757fb5a13611ea8914eb58c3d0d26243468/proto_plus-1.26.1.tar.gz", hash = "sha256:21a515a4c4c0088a773899e23c7bbade3d18f9c66c73edd4c7ee3816bc96a012", size = 56142, upload-time = "2025-03-10T15:54:38.843Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4e/6d/280c4c2ce28b1593a19ad5239c8b826871fc6ec275c21afc8e1820108039/proto_plus-1.26.1-py3-none-any.whl", hash = "sha256:13285478c2dcf2abb829db158e1047e2f1e8d63a077d94263c2b88b043c75a66", size = 50163, upload-time = "2025-03-10T15:54:37.335Z" },
+]
+
+[[package]]
 name = "protobuf"
 version = "4.23.3"
 source = { registry = "https://pypi.org/simple" }
@@ -5059,23 +5233,23 @@ wheels = [
 
 [[package]]
 name = "protobuf"
-version = "6.33.1"
+version = "5.29.5"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.13'",
+    "python_full_version >= '3.14'",
+    "python_full_version == '3.13.*'",
     "python_full_version == '3.12.*'",
     "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0a/03/a1440979a3f74f16cab3b75b0da1a1a7f922d56a8ddea96092391998edc0/protobuf-6.33.1.tar.gz", hash = "sha256:97f65757e8d09870de6fd973aeddb92f85435607235d20b2dfed93405d00c85b", size = 443432, upload-time = "2025-11-13T16:44:18.895Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/43/29/d09e70352e4e88c9c7a198d5645d7277811448d76c23b00345670f7c8a38/protobuf-5.29.5.tar.gz", hash = "sha256:bc1463bafd4b0929216c35f437a8e28731a2b7fe3d98bb77a600efced5a15c84", size = 425226, upload-time = "2025-05-28T23:51:59.82Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/06/f1/446a9bbd2c60772ca36556bac8bfde40eceb28d9cc7838755bc41e001d8f/protobuf-6.33.1-cp310-abi3-win32.whl", hash = "sha256:f8d3fdbc966aaab1d05046d0240dd94d40f2a8c62856d41eaa141ff64a79de6b", size = 425593, upload-time = "2025-11-13T16:44:06.275Z" },
-    { url = "https://files.pythonhosted.org/packages/a6/79/8780a378c650e3df849b73de8b13cf5412f521ca2ff9b78a45c247029440/protobuf-6.33.1-cp310-abi3-win_amd64.whl", hash = "sha256:923aa6d27a92bf44394f6abf7ea0500f38769d4b07f4be41cb52bd8b1123b9ed", size = 436883, upload-time = "2025-11-13T16:44:09.222Z" },
-    { url = "https://files.pythonhosted.org/packages/cd/93/26213ff72b103ae55bb0d73e7fb91ea570ef407c3ab4fd2f1f27cac16044/protobuf-6.33.1-cp39-abi3-macosx_10_9_universal2.whl", hash = "sha256:fe34575f2bdde76ac429ec7b570235bf0c788883e70aee90068e9981806f2490", size = 427522, upload-time = "2025-11-13T16:44:10.475Z" },
-    { url = "https://files.pythonhosted.org/packages/c2/32/df4a35247923393aa6b887c3b3244a8c941c32a25681775f96e2b418f90e/protobuf-6.33.1-cp39-abi3-manylinux2014_aarch64.whl", hash = "sha256:f8adba2e44cde2d7618996b3fc02341f03f5bc3f2748be72dc7b063319276178", size = 324445, upload-time = "2025-11-13T16:44:11.869Z" },
-    { url = "https://files.pythonhosted.org/packages/8e/d0/d796e419e2ec93d2f3fa44888861c3f88f722cde02b7c3488fcc6a166820/protobuf-6.33.1-cp39-abi3-manylinux2014_s390x.whl", hash = "sha256:0f4cf01222c0d959c2b399142deb526de420be8236f22c71356e2a544e153c53", size = 339161, upload-time = "2025-11-13T16:44:12.778Z" },
-    { url = "https://files.pythonhosted.org/packages/1d/2a/3c5f05a4af06649547027d288747f68525755de692a26a7720dced3652c0/protobuf-6.33.1-cp39-abi3-manylinux2014_x86_64.whl", hash = "sha256:8fd7d5e0eb08cd5b87fd3df49bc193f5cfd778701f47e11d127d0afc6c39f1d1", size = 323171, upload-time = "2025-11-13T16:44:14.035Z" },
-    { url = "https://files.pythonhosted.org/packages/08/b4/46310463b4f6ceef310f8348786f3cff181cea671578e3d9743ba61a459e/protobuf-6.33.1-py3-none-any.whl", hash = "sha256:d595a9fd694fdeb061a62fbe10eb039cc1e444df81ec9bb70c7fc59ebcb1eafa", size = 170477, upload-time = "2025-11-13T16:44:17.633Z" },
+    { url = "https://files.pythonhosted.org/packages/5f/11/6e40e9fc5bba02988a214c07cf324595789ca7820160bfd1f8be96e48539/protobuf-5.29.5-cp310-abi3-win32.whl", hash = "sha256:3f1c6468a2cfd102ff4703976138844f78ebd1fb45f49011afc5139e9e283079", size = 422963, upload-time = "2025-05-28T23:51:41.204Z" },
+    { url = "https://files.pythonhosted.org/packages/81/7f/73cefb093e1a2a7c3ffd839e6f9fcafb7a427d300c7f8aef9c64405d8ac6/protobuf-5.29.5-cp310-abi3-win_amd64.whl", hash = "sha256:3f76e3a3675b4a4d867b52e4a5f5b78a2ef9565549d4037e06cf7b0942b1d3fc", size = 434818, upload-time = "2025-05-28T23:51:44.297Z" },
+    { url = "https://files.pythonhosted.org/packages/dd/73/10e1661c21f139f2c6ad9b23040ff36fee624310dc28fba20d33fdae124c/protobuf-5.29.5-cp38-abi3-macosx_10_9_universal2.whl", hash = "sha256:e38c5add5a311f2a6eb0340716ef9b039c1dfa428b28f25a7838ac329204a671", size = 418091, upload-time = "2025-05-28T23:51:45.907Z" },
+    { url = "https://files.pythonhosted.org/packages/6c/04/98f6f8cf5b07ab1294c13f34b4e69b3722bb609c5b701d6c169828f9f8aa/protobuf-5.29.5-cp38-abi3-manylinux2014_aarch64.whl", hash = "sha256:fa18533a299d7ab6c55a238bf8629311439995f2e7eca5caaff08663606e9015", size = 319824, upload-time = "2025-05-28T23:51:47.545Z" },
+    { url = "https://files.pythonhosted.org/packages/85/e4/07c80521879c2d15f321465ac24c70efe2381378c00bf5e56a0f4fbac8cd/protobuf-5.29.5-cp38-abi3-manylinux2014_x86_64.whl", hash = "sha256:63848923da3325e1bf7e9003d680ce6e14b07e55d0473253a690c3a8b8fd6e61", size = 319942, upload-time = "2025-05-28T23:51:49.11Z" },
+    { url = "https://files.pythonhosted.org/packages/7e/cc/7e77861000a0691aeea8f4566e5d3aa716f2b1dece4a24439437e41d3d25/protobuf-5.29.5-py3-none-any.whl", hash = "sha256:6cf42630262c59b2d8de33954443d94b746c952b01434fc58a417fdbd2e84bd5", size = 172823, upload-time = "2025-05-28T23:51:58.157Z" },
 ]
 
 [[package]]
@@ -5331,7 +5505,8 @@ name = "pydantic"
 version = "2.12.5"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.13' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version >= '3.14' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
+    "python_full_version == '3.13.*' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
     "python_full_version == '3.12.*' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
     "python_full_version == '3.11.*' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
     "python_full_version < '3.11' and extra == 'extra-9-recipebot-llm' and extra != 'extra-9-recipebot-rasa'",
@@ -6178,10 +6353,12 @@ source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "ddgs" },
+    { name = "number-parser" },
     { name = "pydantic", version = "1.10.9", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-9-recipebot-rasa'" },
     { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-9-recipebot-llm' or extra != 'extra-9-recipebot-rasa'" },
     { name = "requests" },
     { name = "rich" },
+    { name = "spacy" },
     { name = "typer" },
     { name = "types-requests" },
     { name = "yt-dlp" },
@@ -6190,6 +6367,7 @@ dependencies = [
 [package.optional-dependencies]
 llm = [
     { name = "fastapi" },
+    { name = "google-generativeai" },
     { name = "logfire" },
     { name = "pydantic-ai", extra = ["examples"], marker = "extra == 'extra-9-recipebot-llm'" },
     { name = "python-dotenv" },
@@ -6220,7 +6398,9 @@ requires-dist = [
     { name = "ddgs", specifier = ">=9.9.1" },
     { name = "en-core-web-md", marker = "extra == 'rasa'", url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.8.0/en_core_web_md-3.8.0-py3-none-any.whl" },
     { name = "fastapi", marker = "extra == 'llm'", specifier = ">=0.123.5" },
+    { name = "google-generativeai", marker = "extra == 'llm'", specifier = ">=0.8.0" },
     { name = "logfire", marker = "extra == 'llm'", specifier = ">=4.15.1" },
+    { name = "number-parser", specifier = ">=0.3.2" },
     { name = "number-parser", marker = "extra == 'rasa'", specifier = ">=0.3.2" },
     { name = "pydantic", specifier = ">=1.10.9" },
     { name = "pydantic", marker = "extra == 'rasa'", specifier = "<1.10.10" },
@@ -6229,6 +6409,7 @@ requires-dist = [
     { name = "rasa", marker = "extra == 'rasa'", specifier = ">=3.6.21" },
     { name = "requests", specifier = ">=2.32.5" },
     { name = "rich", specifier = ">=14.2.0" },
+    { name = "spacy", specifier = ">=3.8.11" },
     { name = "spacy", marker = "extra == 'rasa'", specifier = ">=3.8.11" },
     { name = "sqlalchemy", marker = "extra == 'rasa'", specifier = "<2.0" },
     { name = "typer", specifier = ">=0.20.0" },
@@ -6952,10 +7133,12 @@ dependencies = [
     { name = "jinja2" },
     { name = "murmurhash" },
     { name = "numpy", version = "1.22.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and platform_python_implementation != 'PyPy' and sys_platform == 'Windows' and extra == 'extra-9-recipebot-rasa') or (python_full_version >= '3.11' and platform_python_implementation != 'PyPy' and extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (platform_python_implementation == 'PyPy' and extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (sys_platform != 'Windows' and extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
-    { name = "numpy", version = "1.23.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and platform_python_implementation != 'PyPy' and extra == 'extra-9-recipebot-rasa') or (python_full_version < '3.11' and platform_python_implementation != 'PyPy' and extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (platform_python_implementation == 'PyPy' and extra == 'extra-9-recipebot-rasa') or (sys_platform != 'Windows' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "numpy", version = "1.23.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and platform_python_implementation == 'PyPy') or (python_full_version < '3.11' and platform_python_implementation != 'PyPy' and extra == 'extra-9-recipebot-llm') or (python_full_version < '3.11' and platform_python_implementation != 'PyPy' and extra != 'extra-9-recipebot-rasa') or (python_full_version < '3.11' and sys_platform != 'Windows') or (python_full_version >= '3.11' and extra == 'extra-9-recipebot-rasa') or (sys_platform != 'Windows' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "numpy", version = "2.3.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-9-recipebot-llm') or (python_full_version >= '3.11' and extra != 'extra-9-recipebot-rasa') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
     { name = "packaging" },
     { name = "preshed" },
-    { name = "pydantic", version = "1.10.9", source = { registry = "https://pypi.org/simple" } },
+    { name = "pydantic", version = "1.10.9", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-9-recipebot-rasa'" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-9-recipebot-llm' or extra != 'extra-9-recipebot-rasa'" },
     { name = "requests" },
     { name = "setuptools" },
     { name = "spacy-legacy" },
@@ -7207,7 +7390,7 @@ version = "1.19.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "nexus-rpc" },
-    { name = "protobuf", version = "6.33.1", source = { registry = "https://pypi.org/simple" } },
+    { name = "protobuf", version = "5.29.5", source = { registry = "https://pypi.org/simple" } },
     { name = "python-dateutil", marker = "python_full_version < '3.11'" },
     { name = "types-protobuf" },
     { name = "typing-extensions" },
@@ -7545,10 +7728,12 @@ dependencies = [
     { name = "cymem" },
     { name = "murmurhash" },
     { name = "numpy", version = "1.22.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and platform_python_implementation != 'PyPy' and sys_platform == 'Windows' and extra == 'extra-9-recipebot-rasa') or (python_full_version >= '3.11' and platform_python_implementation != 'PyPy' and extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (platform_python_implementation == 'PyPy' and extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (sys_platform != 'Windows' and extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
-    { name = "numpy", version = "1.23.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and platform_python_implementation != 'PyPy' and extra == 'extra-9-recipebot-rasa') or (python_full_version < '3.11' and platform_python_implementation != 'PyPy' and extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa') or (platform_python_implementation == 'PyPy' and extra == 'extra-9-recipebot-rasa') or (sys_platform != 'Windows' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "numpy", version = "1.23.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and platform_python_implementation == 'PyPy') or (python_full_version < '3.11' and platform_python_implementation != 'PyPy' and extra == 'extra-9-recipebot-llm') or (python_full_version < '3.11' and platform_python_implementation != 'PyPy' and extra != 'extra-9-recipebot-rasa') or (python_full_version < '3.11' and sys_platform != 'Windows') or (python_full_version >= '3.11' and extra == 'extra-9-recipebot-rasa') or (sys_platform != 'Windows' and extra == 'extra-9-recipebot-rasa')" },
+    { name = "numpy", version = "2.3.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and extra == 'extra-9-recipebot-llm') or (python_full_version >= '3.11' and extra != 'extra-9-recipebot-rasa') or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
     { name = "packaging" },
     { name = "preshed" },
-    { name = "pydantic", version = "1.10.9", source = { registry = "https://pypi.org/simple" } },
+    { name = "pydantic", version = "1.10.9", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-9-recipebot-rasa'" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-9-recipebot-llm' or extra != 'extra-9-recipebot-rasa'" },
     { name = "setuptools" },
     { name = "srsly" },
     { name = "wasabi" },
@@ -7687,7 +7872,7 @@ name = "tqdm"
 version = "4.67.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a8/4b/29b4ef32e036bb34e4ab51796dd745cdba7ed47ad142a9f4a1eb8e0c744d/tqdm-4.67.1.tar.gz", hash = "sha256:f8aef9c52c08c13a65f30ea34f4e5aac3fd1a34959879d7e59e63027286627f2", size = 169737, upload-time = "2024-11-24T20:12:22.481Z" }
 wheels = [
@@ -7943,6 +8128,15 @@ wheels = [
 ]
 
 [[package]]
+name = "uritemplate"
+version = "4.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/98/60/f174043244c5306c9988380d2cb10009f91563fc4b31293d27e17201af56/uritemplate-4.2.0.tar.gz", hash = "sha256:480c2ed180878955863323eea31b0ede668795de182617fef9c6ca09e6ec9d0e", size = 33267, upload-time = "2025-06-02T15:12:06.318Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a9/99/3ae339466c9183ea5b8ae87b34c0b897eda475d2aec2307cae60e5cd4f29/uritemplate-4.2.0-py3-none-any.whl", hash = "sha256:962201ba1c4edcab02e60f9a0d3821e82dfc5d2d6662a21abd533879bdb8a686", size = 11488, upload-time = "2025-06-02T15:12:03.405Z" },
+]
+
+[[package]]
 name = "urllib3"
 version = "2.5.0"
 source = { registry = "https://pypi.org/simple" }
@@ -8023,7 +8217,7 @@ name = "wasabi"
 version = "1.1.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-9-recipebot-llm' and extra == 'extra-9-recipebot-rasa')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/ac/f9/054e6e2f1071e963b5e746b48d1e3727470b2a490834d18ad92364929db3/wasabi-1.1.3.tar.gz", hash = "sha256:4bb3008f003809db0c3e28b4daf20906ea871a2bb43f9914197d540f4f2e0878", size = 30391, upload-time = "2024-05-31T16:56:18.99Z" }
 wheels = [
@@ -8150,7 +8344,8 @@ dependencies = [
     { name = "cloudpathlib" },
     { name = "confection" },
     { name = "packaging" },
-    { name = "pydantic", version = "1.10.9", source = { registry = "https://pypi.org/simple" } },
+    { name = "pydantic", version = "1.10.9", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-9-recipebot-rasa'" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-9-recipebot-llm' or extra != 'extra-9-recipebot-rasa'" },
     { name = "requests" },
     { name = "smart-open" },
     { name = "srsly" },
@@ -8240,7 +8435,8 @@ name = "websockets"
 version = "15.0.1"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.13'",
+    "python_full_version >= '3.14'",
+    "python_full_version == '3.13.*'",
     "python_full_version == '3.12.*'",
     "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
