@@ -8,9 +8,9 @@ type:
 test:
 	uv run pytest -vls
 
-submit:
+zip-submission:
 	@echo "Creating submission zip file..."
-	output_file="cs337-nlp-project-2-group-4-submission.zip"; \
+	output_file="cs337-nlp-project-2-group-4-part2.zip"; \
 	rm "$$output_file" 2>/dev/null || true; \
 	zip -r "$$output_file" . \
 		-x '*egg-info*' \

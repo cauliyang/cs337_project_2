@@ -131,7 +131,7 @@ def main(pass_msg_history: bool = False, parse_html: bool = False, add_step_pref
 
 
 @app.callback(invoke_without_command=True)
-def main_callback(ctx: typer.Context, parse_html: bool = False):
+def main_callback(ctx: typer.Context, parse_html: bool = True):
     """Recipe Assistant - Hybrid-Powered.
 
     Args:
@@ -143,7 +143,7 @@ def main_callback(ctx: typer.Context, parse_html: bool = False):
 
 
 @app.command()
-def chat(parse_html: bool = False):
+def chat(parse_html: bool = True):
     """Start interactive chat with hybrid recipe assistant.
 
     Args:

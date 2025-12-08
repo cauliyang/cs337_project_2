@@ -82,6 +82,26 @@ rasa run actions
 rasa shell
 ```
 
+## LLM Only
+
+```sh
+# install dependencies
+uv sync --extra llm
+
+# run the Agent
+uv run recipebot-llm
+```
+
+## Hybrid
+
+```sh
+# install dependencies
+uv sync --extra llm
+
+# run the Agent
+uv run recipebot-hybrid
+```
+
 ## Development
 
 ```sh
