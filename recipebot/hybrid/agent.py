@@ -57,7 +57,7 @@ Handle requests to show recipe components:
 - "What's in this recipe?"
 - "Show me all steps" / "Display all steps" / "List all steps"
 
-**Response**: 
+**Response**:
 - Extract and display the requested information directly from the recipe JSON
 - For "show all steps" requests: List ALL steps from the `steps` array in the recipe JSON, showing each step number and description
 - Do NOT just show the current step - show the complete list of all steps in the recipe
@@ -97,7 +97,7 @@ Provide definitions and explanations:
 - "What does 'fold' mean?"
 - "What is blanching?"
 
-**Response**: 
+**Response**:
 - Provide clear definitions using your culinary knowledge
 - **ALWAYS automatically search for YouTube videos** using the `search_youtube` tool when users ask "what is" or "what does" questions
 - **IMPORTANT**: Include 2-3 relevant videos with FULL YouTube URLs (not just titles) in this format:
@@ -143,12 +143,12 @@ Answer about ingredient amounts:
    - For ingredient/tool questions: Search in the `ingredients` array or step-specific ingredients
    - **Provide direct, confident answers** - never mention what you can or cannot do with tools
 
-2. **Step Navigation**: 
+2. **Step Navigation**:
    - Use the `navigate_step` tool when the user explicitly requests to change steps
    - After using `navigate_step`, always read the recipe JSON to get the step details and present them to the user
    - The recipe JSON is provided in the system instructions with the current_step number
 
-3. **External Search**: 
+3. **External Search**:
    - **ALWAYS use `search_youtube`** automatically when users ask "what is", "what does", "how do I", or "how to" questions
    - **CRITICAL**: When presenting YouTube search results, ALWAYS include the FULL video URLs (https://www.youtube.com/watch?v=VIDEO_ID), not just titles
    - Format: "Video Title" - https://www.youtube.com/watch?v=VIDEO_ID (Duration: X minutes)
@@ -224,7 +224,7 @@ def navigate_step(ctx: RunContext[Deps], action: str, step_number: int | None = 
 
     ctx.deps.current_step = new_step
 
-    return f"Successfully navigated to step {new_step}. Now read the recipe JSON from the system context to get the details of step {new_step} and present them to the user."
+    return f"Successfully navigated to step {new_step}. Now read the recipe JSON from the system context to get the details of step {new_step} and present them to the user."  # noqa: E501
 
 
 class HybridAgent:

@@ -8,7 +8,7 @@ type:
 test:
 	uv run pytest -vls
 
-zip-submission:
+zip:
 	@echo "Creating submission zip file..."
 	output_file="cs337-nlp-project-2-group-4-part2.zip"; \
 	rm "$$output_file" 2>/dev/null || true; \
@@ -34,7 +34,9 @@ zip-submission:
 		-x '*.pt' \
 		-x '*.pth' \
 		-x '*.npy' \
-		-x '*.npz' ; \
-		-x '*examples' ; \
-		-x '*.env' ; \
+		-x '*.npz' \
+		-x '*examples' \
+		-x '*.env' \
+		-x 'rasa/*' \
+		-x 'submit/*' ; \
 	echo "All files have been compressed into $$output_file"

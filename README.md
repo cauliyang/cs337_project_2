@@ -84,6 +84,16 @@ rasa shell
 
 ## LLM Only
 
+Make sure to set the `GEMINI_API_KEY` in the `.env` file.
+
+```sh
+# create the .env file
+cp .env.example .env
+
+# set the `GEMINI_API_KEY` in the .env file
+GEMINI_API_KEY=your_api_key
+```
+
 ```sh
 # install dependencies
 uv sync --extra llm
@@ -93,6 +103,16 @@ uv run recipebot-llm
 ```
 
 ## Hybrid
+
+Make sure to set the `GEMINI_API_KEY` in the `.env` file.
+
+```sh
+# create the .env file
+cp .env.example .env
+
+# set the `GEMINI_API_KEY` in the .env file
+GEMINI_API_KEY=your_api_key
+```
 
 ```sh
 # install dependencies
