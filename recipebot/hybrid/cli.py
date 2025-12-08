@@ -55,7 +55,7 @@ def print_user(message: str):
     console.print(f"[bold blue]You:[/bold blue] {message}")
 
 
-def main(parse_html: bool = False):
+def main(pass_msg_history: bool = False, parse_html: bool = False, add_step_prefix: bool = False):
     """Start interactive chat with hybrid recipe assistant.
 
     Args:
@@ -102,19 +102,21 @@ def main(parse_html: bool = False):
                         f"• {len(recipe_state.directions)} directions\n"
                         f"• {len(recipe_state.steps)} parsed steps\n"
                     )
-                    print_assistant(response)
+                    print_assistant(Markdown(response))
                 except Exception as e:
                     print_error(f"Failed to load recipe: {e}")
             else:
                 # Regular question
-                if not assistant.current_recipe_state:
+                if not assistant.current_recipe:
                     print_error("No recipe loaded. Please provide a recipe URL first.")
                     continue
                 if PRINT_USER:
                     print_user(user_input)
+
                 response = assistant.ask(user_input)
                 # print current step as prefix of the response
-                response = f"Step {assistant.current_recipe_state.current_step}: \n {response}"
+                if add_step_prefix:
+                    response = f"Step {assistant.current_step}: \n {response}"
                 markdown = Markdown(response)
                 print_assistant(markdown)
 

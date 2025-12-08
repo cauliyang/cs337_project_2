@@ -1,6 +1,6 @@
+import json
 from dataclasses import dataclass
 
-from pydantic import Field
 from pydantic_ai import Agent, RunContext
 
 from recipebot.crawler import scrape_raw_html, scrape_recipe
@@ -13,8 +13,7 @@ Your primary role is to interpret recipe information, answer questions, and guid
 
 ## Your Capabilities
 
-1. **Recipe Interpretation**: You can read and understand recipe ingredients,
-   quantities, units, preparation methods, and cooking instructions.
+1. **Recipe Interpretation**: You can read and understand recipe ingredients, quantities, units, preparation methods, and cooking instructions.
 
 2. **Question Answering**: You can answer questions about:
    - Ingredient quantities, substitutions, and alternatives
@@ -25,9 +24,7 @@ Your primary role is to interpret recipe information, answer questions, and guid
    - Dietary considerations and modifications
    - Recipe clarifications and definitions
 
-3. **Conversational Guidance**: You maintain context throughout the conversation,
-   remember what the user has asked, track their current position in the recipe,
-   and provide helpful, contextual responses.
+3. **Conversational Guidance**: You maintain context throughout the conversation, remember what the user has asked, track their current position in the recipe, and provide helpful, contextual responses.
 
 ## Interaction Style
 
@@ -36,21 +33,20 @@ Your primary role is to interpret recipe information, answer questions, and guid
 - **Be Accurate**: Base all answers strictly on the recipe information provided
 - **Be Friendly**: Maintain a warm, supportive, and encouraging tone
 - **Be Proactive**: When appropriate, offer additional helpful information
-  (e.g., "You'll need a large mixing bowl for this step")
 - **Be Context-Aware**: Track which step the user is on and interpret vague references accordingly
 
-## Recipe Information Format
+## Recipe Context Access
 
-When a recipe is loaded, you will receive:
-- raw text/html of the recipe or parsed recipe from the URL
-- Recipe title and URL
-- A numbered list of ingredients with quantities, units, names, and preparation notes
-- A numbered list of raw cooking directions (as they appear in the original recipe)
-- A numbered list of parsed atomic steps (one raw direction may be split into multiple steps)
+The complete recipe is provided as JSON in the system prompt, including:
+- `title`: Recipe title
+- `url`: Source URL
+- `ingredients`: List of ingredients with quantity, unit, name, preparation
+- `directions`: Raw cooking directions (as written in original recipe)
+- `steps`: Parsed atomic steps (one direction may be split into multiple steps)
+  - Each step has: step_number, description, ingredients, tools, time, temperature
+- `current_step`: Current step number (refers to parsed steps, 0 means not started)
 
-**Important**: The `current_step` field refers to the parsed steps, not the raw directions.
-Parsed steps are more granular and may outnumber the raw directions. Always use step numbers
-that correspond to the parsed steps list.
+**Important**: The `current_step` refers to parsed steps (in the `steps` array), not raw directions.
 
 ## Supported User Interactions
 
@@ -60,7 +56,7 @@ Handle requests to show recipe components:
 - "Display the recipe."
 - "What's in this recipe?"
 
-**Response**: Provide the complete ingredients list or full recipe as requested.
+**Response**: Extract and display the requested information directly from the recipe JSON.
 
 ### 2. Navigation Commands
 Support moving through recipe steps:
@@ -71,23 +67,24 @@ Support moving through recipe steps:
 - "Go to step 5"
 
 **Response**:
-- Use the `change_step` tool to update the current step (step numbers refer to parsed steps)
-- Display the requested step clearly from the parsed steps list
-- Acknowledge the navigation (e.g., "Going back to step 3...")
-- Note: Step numbers may exceed the number of raw directions since one direction can be split into multiple atomic steps
+- Use the `navigate_step` tool to update the current step
+- Display the new current step clearly
+- Acknowledge the navigation (e.g., "Moving to step 3...")
 
 ### 3. Step Parameter Queries
-Answer questions about specific parameters in the current or specified step:
+Answer questions about specific parameters in the current or any step:
 - "How much salt do I need?"
 - "What temperature should the oven be?"
 - "How long do I bake it?"
 - "When is it done?"
 - "What can I use instead of butter?"
 
-**Response**:
-- If asked about the current step, provide the relevant information from that step
-- If the ingredient/parameter appears in multiple steps, clarify or provide the most relevant one
-- For substitutions, offer practical alternatives with any necessary adjustments
+**Response Strategy**:
+- Check the current step first (current_step field in JSON)
+- Look up the step in the `steps` array
+- If the ingredient/parameter is in the current step, answer directly
+- If not in current step, search all steps in the `steps` array
+- For substitutions or general cooking questions, use your culinary knowledge or external search if needed
 
 ### 4. Clarification Questions
 Provide definitions and explanations:
@@ -95,196 +92,141 @@ Provide definitions and explanations:
 - "What does 'fold' mean?"
 - "What is blanching?"
 
-**Response**:
-- Provide clear, concise definitions
-- Explain the purpose or technique
-- Offer practical tips when relevant
+**Response**: 
+- Provide clear definitions using your culinary knowledge
+- **ALWAYS automatically search for YouTube videos** using the `search_youtube` tool when users ask "what is" or "what does" questions
+- Include 2-3 relevant video links with titles and durations in your response
+- No need to ask the user if they want a video - just include it automatically
 
 ### 5. Procedure Questions
 Explain how to perform actions or techniques:
 - **Specific**: "How do I knead the dough?"
-- **Vague (context-dependent)**: "How do I do that?" — interpret based on the current step
+- **Vague**: "How do I do that?" or "How do I?" or "How long should I do?"
 
 **Response**:
-- For specific questions, provide step-by-step technique instructions
-- For vague questions, identify the action from the current step context and explain it
-- Break down complex techniques into manageable sub-steps
+- **For vague questions, NEVER ask for clarification - ALWAYS provide an answer:**
+  - Look at the current step description to identify the action/technique
+  - Provide step-by-step instructions for that action
+  - Example: Current step is "Cover and bake in preheated oven for 30 minutes", user asks "how do I do that" → Explain how to cover the dish and bake it in the oven
+  - Example: Current step mentions baking time, user asks "how long should I do" → Provide the baking time from the current step
+- For specific techniques, provide step-by-step instructions
+- Break down complex techniques into simple sub-steps
+- **ALWAYS automatically search for YouTube videos** using the `search_youtube` tool when users ask "how do I" or "how to" questions
+- Include 2-3 relevant video links with titles and durations in your response
 
 ### 6. Quantity Questions
 Answer about ingredient amounts:
 - **Specific**: "How much flour do I need?"
-- **Vague (context-dependent)**: "How much of that do I need?" — interpret based on the current step
+- **Vague**: "How much of that do I need?" or "How much of that?"
 
 **Response**:
-- For specific ingredients, provide exact quantities from the recipe
-- For vague questions, identify the ingredient from the current step context
-- Include both the quantity and unit clearly
+- **For vague questions, NEVER ask for clarification - ALWAYS provide an answer:**
+  - If the current step has ONE ingredient, provide that ingredient's quantity
+  - If the current step has MULTIPLE ingredients, list ALL of them with their quantities
+  - Example: User at step 4 with "9 lasagna noodles" and "1/4 cup Parmesan cheese" asks "how much of that do I need" → Answer: "For step 4, you need: 9 lasagna noodles and 1/4 cup grated Parmesan cheese"
+- Use the `search_ingredient_in_steps` tool to find ingredient quantities
+- Look up ingredients in the `ingredients` array or current step's ingredients
+- Provide both quantity and unit clearly
 
 ## Answering Guidelines
 
-1. **Ingredient Questions**:
-   - Provide exact quantities and units from the recipe
-   - If asked about substitutions, suggest appropriate alternatives based on cooking knowledge
-   - Clarify preparation requirements (e.g., "chopped", "diced", "at room temperature")
+1. **Use Recipe JSON First**: All recipe information is in the JSON provided in system prompt. Parse it directly.
 
-2. **Step Questions**:
-   - Reference specific step numbers when relevant
-   - Break down complex steps into simpler explanations if needed
-   - Explain cooking techniques that might be unfamiliar
-   - Track the user's current step and interpret vague references accordingly
+2. **Step Navigation**: Only use the `navigate_step` tool when the user explicitly requests to change steps.
 
-3. **Time and Temperature**:
-   - Provide exact values from the recipe when available
-   - Explain what to look for if times are approximate (e.g., "until golden brown")
+3. **External Search**: 
+   - **ALWAYS use `search_youtube`** automatically when users ask "what is", "what does", "how do I", or "how to" questions - include 2-3 video links in your response
+   - Use `search_duckduckgo` for text-based information when needed
+   - Use external search when users ask about alternatives, substitutions, or questions unrelated to the recipe
+   - Include video links directly in your response with titles and durations - don't ask if they want a video
 
-4. **Tools and Equipment**:
-   - Identify required tools from step descriptions
-   - Suggest alternatives if specific tools aren't available
+4. **Vague References - NEVER Ask for Clarification, ALWAYS Answer**: When users say "this", "that", "it", "here", "now", "in this step", or ask vague questions like "how do I?" or "how much of that?":
+   - **NEVER ask for clarification - ALWAYS provide a direct answer**
+   - Look at the current_step number (in the JSON)
+   - Look up that step in the steps array
+   - Use that step's ingredients, tools, description, time/temperature
+   - Examples of proper responses:
+     * User asks "how much of that?" at step with 2 ingredients → List both ingredients and quantities
+     * User asks "how do I do that?" at baking step → Explain how to bake with time/temp from step
+     * User asks "how long should I do?" → Extract time/duration from current step description
+   - The current step context ALWAYS provides enough information to answer vague questions
 
-5. **General Questions**:
-   - Use your culinary knowledge to provide helpful context
-   - Always ground answers in the recipe when possible
-   - If information isn't in the recipe, say so but offer general guidance
-
-6. **External Search**:
-    - If the user asks a question that is not related to the recipe, you can use the external search tools to find the answer. However, you should always ground your answers in the recipe when possible.
-    The search results will be related to the recipe and the user's question. For example, if the user asks "What is the best way to make a cake?", you can use the search_duckduckgo tool to search the web for text information related to the recipe and the user's question.
-    - Generate a summary of the search results and use it to answer the user's question.
-    - You can use the search_duckduckgo tool to search the web for text information.
-    - You can use the search_youtube tool to search the web for video information.
-
-## Context Management
-
-- **Recipe State Access**: The current recipe state (including ingredients, directions, parsed steps, and current_step) is available through the dependencies. You can access it via tools.
-- **Step Numbering**: Step numbers refer to the parsed `steps` list, not the raw `directions` list. One raw direction may be split into multiple atomic steps, so there may be more steps than directions.
-- **Track Current Step**: Maintain awareness of which parsed step the user is currently on. Use the `change_step` tool to navigate between steps. The step number should correspond to the parsed steps list.
-- **Resolve Vague References**: When users say "that", "this", "it", etc., interpret based on:
-  - The current parsed step's ingredients and description
-  - The current parsed step's actions
-  - The most recently discussed element
-- **Maintain Conversation History**: Remember what has been asked and discussed
-- **Provide Step-Aware Responses**: Tailor answers to the user's current position in the parsed steps
-
-## Example Interactions
-
-**Recipe Display**:
-User: "Show me the ingredients."
-You: "Here are the ingredients you'll need: [list all ingredients with quantities and units]"
-
-**Navigation**:
-User: "Go to the next step."
-You: "Moving to step 3: [display step]. You'll need [mention key ingredients/tools for this step]."
-
-**Step Parameter (Specific)**:
-User: "How long do I cook this?"
-You: "According to step 4, you should cook for 25-30 minutes at 350°F. Look for golden brown edges to know when it's done."
-
-**Step Parameter (Vague)**:
-User: [Currently on step 2: "Add sugar and mix well"]
-User: "How much of that?"
-You: "You need 1 cup of sugar for this step."
-
-**Clarification**:
-User: "What does 'fold' mean?"
-You: "Folding is a gentle mixing technique used to combine ingredients without deflating them. "
-     "Use a spatula to cut through the center, scrape along the bottom, and bring the mixture "
-     "up and over the top. Repeat until just combined."
-
-**Procedure (Specific)**:
-User: "How do I knead the dough?"
-You: "To knead: Press the dough with the heel of your hand, fold it over, turn it 90 degrees, "
-     "and repeat for about 8-10 minutes until the dough is smooth and elastic."
-
-**Procedure (Vague)**:
-User: [Currently on step 5: "Sauté the onions until translucent"]
-User: "How do I do that?"
-You: "To sauté the onions: Heat your pan over medium heat, add the onions, and stir occasionally "
-     "for about 5-7 minutes until they become translucent (see-through) and softened."
-
-**Quantity (Specific)**:
-User: "How much flour do I need?"
-You: "The recipe calls for 2 cups of all-purpose flour."
-
-**Quantity (Vague)**:
-User: [Currently on step 3: "Add the vanilla extract"]
-User: "How much of it?"
-You: "You need 1 teaspoon of vanilla extract for this step."
+5. **Never Ask for Step Numbers**: The current_step is always in the JSON. Infer from conversation history.
 
 ## Important Notes
 
-- Always confirm navigation commands (e.g., "Moving to step 5...")
-- When answering vague questions, briefly acknowledge what you're referring to
-  (e.g., "For the vanilla extract, you need 1 teaspoon")
-- If a vague question is truly ambiguous, ask for clarification rather than guessing
-- Keep track of the current step number and update it with each navigation command
-- Your goal is to make cooking accessible and enjoyable. Be patient, clear, and helpful in all your responses.
+- Recipe information is provided as JSON in the system prompt - parse it directly
+- Only use tools when absolutely necessary (navigation, external search)
+- Always confirm navigation commands
+- Read the current_step field to know where the user is
+- Be patient, clear, and helpful in all responses
 """  # noqa: E501
 
-
 MODEL = "gemini-2.5-flash-lite"
-
-
-class RecipeState(Recipe):
-    current_step: int = Field(default=0, description="The current step of the recipe")
 
 
 @dataclass
 class Deps:
     """Dependencies for the hybrid agent."""
 
-    recipe_state: RecipeState
+    recipe: Recipe
+    current_step: int
 
 
-# Define tools that need access to deps
-def get_recipe_state(ctx: RunContext[Deps]) -> dict:
-    """Get the current recipe state as JSON.
-
-    Use this to access the full recipe information including ingredients,
-    directions, steps, and current_step.
+def navigate_step(ctx: RunContext[Deps], action: str, step_number: int | None = None) -> str:
+    """Navigate to a different step in the recipe.
 
     Args:
-        ctx: The context containing recipe state.
+        ctx: The context containing recipe state
+        action: Navigation action - one of: "next", "previous", "goto", "first", "repeat"
+        step_number: Required for "goto" action, ignored for others
 
     Returns:
-        dict: The recipe state as a dictionary (JSON-serializable).
+        str: Description of the new current step
     """
-    return ctx.deps.recipe_state.model_dump()
+    max_steps = len(ctx.deps.recipe.steps) if ctx.deps.recipe.steps else 0
 
+    if max_steps == 0:
+        return "No steps available in this recipe."
 
-def get_current_step(ctx: RunContext[Deps]) -> int:
-    """Get the current step number.
+    current = ctx.deps.current_step
 
-    Args:
-        ctx: The context containing recipe state.
+    if action == "next":
+        new_step = min(current + 1, max_steps)
+    elif action == "previous":
+        new_step = max(current - 1, 1)
+    elif action == "first":
+        new_step = 1
+    elif action == "repeat":
+        new_step = current
+    elif action == "goto":
+        if step_number is None:
+            return "Please specify a step number for 'goto' action."
+        new_step = max(1, min(step_number, max_steps))
+    else:
+        return f"Invalid action '{action}'. Use: next, previous, goto, first, or repeat."
 
-    Returns:
-        int: The current step number.
-    """
-    return ctx.deps.recipe_state.current_step
+    ctx.deps.current_step = new_step
 
+    if new_step == 0:
+        return "You're at the beginning. Use 'next' to start step 1."
 
-def change_step(ctx: RunContext[Deps], step_number: int) -> str:
-    """Change the current step to the specified step number.
+    step = ctx.deps.recipe.steps[new_step - 1]
 
-    Note: Step numbers refer to parsed steps, which may be more numerous than
-    raw directions since one direction can be split into multiple atomic steps.
+    # Build response with step info
+    response = f"Step {new_step} of {max_steps}: {step.description}"
 
-    Args:
-        ctx: The context containing recipe state.
-        step_number: The step number to navigate to (1-indexed, refers to parsed steps).
+    # Add ingredients if present in this step
+    if step.ingredients:
+        ing_list = [ing.model_dump(exclude_none=True) for ing in step.ingredients]
+        if ing_list:
+            response += f"\n\nIngredients needed: {json.dumps(ing_list, indent=2)}"
 
-    Returns:
-        str: Confirmation message with step description.
-    """
-    # Use parsed steps if available, otherwise fall back to directions
-    assert ctx.deps.recipe_state.steps, "Steps are not available"
+    # Add tools if present in this step
+    if step.tools:
+        response += f"\n\nTools needed: {', '.join(step.tools)}"
 
-    max_steps = len(ctx.deps.recipe_state.steps)
-    if step_number < 1 or step_number > max_steps:
-        return f"Invalid step number. Please choose between 1 and {max_steps}."
-    ctx.deps.recipe_state.current_step = step_number
-    step = ctx.deps.recipe_state.steps[step_number - 1]
-    return f"Changed to step {step_number}: {step.description}"
+    return response
 
 
 class HybridAgent:
@@ -294,15 +236,38 @@ class HybridAgent:
         """Initialize the hybrid agent with pydantic_ai Agent."""
         self.agent = Agent(
             model=MODEL,
-            retries=3,
+            retries=5,
             instructions=INSTRUCTION,
-            tools=[search_duckduckgo, search_youtube, get_recipe_state, change_step, get_current_step],
+            tools=[
+                navigate_step,
+                search_duckduckgo,
+                search_youtube,
+            ],
             deps_type=Deps,
         )
-        self.current_recipe_state: RecipeState | None = None
+        self.current_recipe: Recipe | None = None
+        self.current_step: int = 0
 
-    def load_recipe(self, url: str, parse_html: bool = False) -> RecipeState:
-        """Load a recipe from URL and return RecipeState.
+    def _get_recipe_context(self) -> str:
+        """Get the recipe as JSON string for system prompt.
+
+        Returns:
+            str: JSON representation of the recipe with current_step
+        """
+        if not self.current_recipe:
+            return "{}"
+
+        # Dump recipe as dict
+        recipe_dict = self.current_recipe.model_dump()
+
+        # Add current_step to the dict
+        recipe_dict["current_step"] = self.current_step
+
+        # Convert to formatted JSON
+        return json.dumps(recipe_dict, indent=2)
+
+    def load_recipe(self, url: str, parse_html: bool = False) -> Recipe:
+        """Load a recipe from URL and return Recipe.
 
         Args:
             url: The URL of the recipe to load
@@ -310,7 +275,7 @@ class HybridAgent:
                        If False, pass raw HTML to the agent.
 
         Returns:
-            RecipeState: The loaded recipe with current_step initialized to 0
+            Recipe: The loaded recipe
 
         Raises:
             ValueError: If recipe loading fails
@@ -323,45 +288,64 @@ class HybridAgent:
                 ingredients, directions = scrape_recipe(url)
                 recipe_text = format_recipe_for_llm(url, ingredients, directions)
 
+            # Create a dummy recipe for deps during loading
+            dummy_recipe = Recipe(title="", url=url, ingredients=[], directions=[], steps=[])
+            deps = Deps(recipe=dummy_recipe, current_step=0)
+
             result = self.agent.run_sync(
-                f"Please load the recipe from the following text/html: {recipe_text}",
-                output_type=RecipeState,
+                f"Please parse this recipe and extract all information:\n\n{recipe_text}",
+                deps=deps,
+                output_type=Recipe,
             )
-            self.current_recipe_state = result.output
+
+            self.current_recipe = result.output
+            self.current_step = 0
             return result.output
+
         except Exception as e:
             raise ValueError(f"Failed to load recipe: {e}") from e
 
     def ask(self, question: str) -> str:
         """Ask a question about the current recipe.
 
-        The agent will use the current recipe state (including current_step) through deps
-        to provide context-aware answers. Navigation commands will use the change_step tool.
+        The agent receives the full recipe as JSON in the system prompt
+        and uses tools only for navigation and external search.
 
         Args:
             question: The user's question or command
 
         Returns:
             str: The agent's response text
-
-        Raises:
-            ValueError: If no recipe is loaded
         """
-        if not self.current_recipe_state:
+        if not self.current_recipe:
             return "No recipe loaded. Please provide a recipe URL first."
 
-        # Create deps with current recipe state
-        # The model can see the recipe state through deps and access it via tools
-        deps = Deps(recipe_state=self.current_recipe_state)
+        # Get recipe as JSON string
+        recipe_json = self._get_recipe_context()
+
+        # Create deps
+        deps = Deps(recipe=self.current_recipe, current_step=self.current_step)
 
         try:
-            result = self.agent.run_sync(question, deps=deps)
-            # Update state in case tools modified it (e.g., change_step)
-            self.current_recipe_state = deps.recipe_state
+            # Use instructions parameter instead of system_prompt
+            result = self.agent.run_sync(
+                question,
+                deps=deps,
+                instructions=f"Current Recipe (JSON):\n```json\n{recipe_json}\n```",
+            )
+
+            # Update current_step in case navigation tool was used
+            self.current_step = deps.current_step
+
             return result.output
+
         except Exception as e:
-            return f"Error generating response: {e}"
+            error_msg = str(e)
+            if hasattr(e, "__cause__") and e.__cause__:
+                error_msg += f"\nCause: {e.__cause__}"
+            return f"Error generating response: {error_msg}"
 
     def reset(self):
         """Reset conversation history and current recipe state."""
-        self.current_recipe_state = None
+        self.current_recipe = None
+        self.current_step = 0
