@@ -183,7 +183,7 @@ Answer about ingredient amounts:
 - Be patient, clear, and helpful in all responses
 """  # noqa: E501
 
-MODEL = "gemini-2.5-flash-lite"
+MODEL = "gemini-2.5-flash"
 
 
 @dataclass
