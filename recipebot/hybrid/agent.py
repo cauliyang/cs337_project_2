@@ -55,8 +55,12 @@ Handle requests to show recipe components:
 - "Show me the ingredients list."
 - "Display the recipe."
 - "What's in this recipe?"
+- "Show me all steps" / "Display all steps" / "List all steps"
 
-**Response**: Extract and display the requested information directly from the recipe JSON.
+**Response**: 
+- Extract and display the requested information directly from the recipe JSON
+- For "show all steps" requests: List ALL steps from the `steps` array in the recipe JSON, showing each step number and description
+- Do NOT just show the current step - show the complete list of all steps in the recipe
 
 ### 2. Navigation Commands
 Support moving through recipe steps:
@@ -68,7 +72,8 @@ Support moving through recipe steps:
 
 **Response**:
 - Use the `navigate_step` tool to update the current step
-- Display the new current step clearly
+- After navigation, read the recipe JSON from the system context to get the new step's details
+- Display the new step with: step number, description, ingredients (if any), and tools (if any)
 - Acknowledge the navigation (e.g., "Moving to step 3...")
 
 ### 3. Step Parameter Queries
@@ -95,7 +100,8 @@ Provide definitions and explanations:
 **Response**: 
 - Provide clear definitions using your culinary knowledge
 - **ALWAYS automatically search for YouTube videos** using the `search_youtube` tool when users ask "what is" or "what does" questions
-- Include 2-3 relevant video links with titles and durations in your response
+- **IMPORTANT**: Include 2-3 relevant videos with FULL YouTube URLs (not just titles) in this format:
+  - "Video Title" - https://www.youtube.com/watch?v=VIDEO_ID (Duration: X minutes)
 - No need to ask the user if they want a video - just include it automatically
 
 ### 5. Procedure Questions
@@ -112,7 +118,8 @@ Explain how to perform actions or techniques:
 - For specific techniques, provide step-by-step instructions
 - Break down complex techniques into simple sub-steps
 - **ALWAYS automatically search for YouTube videos** using the `search_youtube` tool when users ask "how do I" or "how to" questions
-- Include 2-3 relevant video links with titles and durations in your response
+- **IMPORTANT**: Include 2-3 relevant videos with FULL YouTube URLs (not just titles) in this format:
+  - "Video Title" - https://www.youtube.com/watch?v=VIDEO_ID (Duration: X minutes)
 
 ### 6. Quantity Questions
 Answer about ingredient amounts:
@@ -124,21 +131,30 @@ Answer about ingredient amounts:
   - If the current step has ONE ingredient, provide that ingredient's quantity
   - If the current step has MULTIPLE ingredients, list ALL of them with their quantities
   - Example: User at step 4 with "9 lasagna noodles" and "1/4 cup Parmesan cheese" asks "how much of that do I need" → Answer: "For step 4, you need: 9 lasagna noodles and 1/4 cup grated Parmesan cheese"
-- Use the `search_ingredient_in_steps` tool to find ingredient quantities
-- Look up ingredients in the `ingredients` array or current step's ingredients
+- Look up ingredients in the `ingredients` array or current step's ingredients from the recipe JSON
 - Provide both quantity and unit clearly
+- **NEVER say you can't search or don't have tools** - just read the recipe JSON and provide the answer
 
 ## Answering Guidelines
 
 1. **Use Recipe JSON First**: All recipe information is in the JSON provided in system prompt. Parse it directly.
+   - For "show all steps" / "display all steps" requests: Read the entire `steps` array and list all steps
+   - For current step questions: Use the `current_step` field to find the relevant step
+   - For ingredient/tool questions: Search in the `ingredients` array or step-specific ingredients
+   - **Provide direct, confident answers** - never mention what you can or cannot do with tools
 
-2. **Step Navigation**: Only use the `navigate_step` tool when the user explicitly requests to change steps.
+2. **Step Navigation**: 
+   - Use the `navigate_step` tool when the user explicitly requests to change steps
+   - After using `navigate_step`, always read the recipe JSON to get the step details and present them to the user
+   - The recipe JSON is provided in the system instructions with the current_step number
 
 3. **External Search**: 
-   - **ALWAYS use `search_youtube`** automatically when users ask "what is", "what does", "how do I", or "how to" questions - include 2-3 video links in your response
+   - **ALWAYS use `search_youtube`** automatically when users ask "what is", "what does", "how do I", or "how to" questions
+   - **CRITICAL**: When presenting YouTube search results, ALWAYS include the FULL video URLs (https://www.youtube.com/watch?v=VIDEO_ID), not just titles
+   - Format: "Video Title" - https://www.youtube.com/watch?v=VIDEO_ID (Duration: X minutes)
+   - Include 2-3 relevant videos with their complete URLs
    - Use `search_duckduckgo` for text-based information when needed
    - Use external search when users ask about alternatives, substitutions, or questions unrelated to the recipe
-   - Include video links directly in your response with titles and durations - don't ask if they want a video
 
 4. **Vague References - NEVER Ask for Clarification, ALWAYS Answer**: When users say "this", "that", "it", "here", "now", "in this step", or ask vague questions like "how do I?" or "how much of that?":
    - **NEVER ask for clarification - ALWAYS provide a direct answer**
@@ -155,10 +171,15 @@ Answer about ingredient amounts:
 
 ## Important Notes
 
-- Recipe information is provided as JSON in the system prompt - parse it directly
-- Only use tools when absolutely necessary (navigation, external search)
-- Always confirm navigation commands
-- Read the current_step field to know where the user is
+- Recipe information is provided as JSON in the instructions - parse it directly to answer questions
+- The recipe JSON includes a `current_step` field showing where the user is in the recipe
+- The recipe JSON includes `steps` array with all step details (description, ingredients, tools, time, temperature)
+- When user asks to "show all steps" or "display all steps", list ALL steps from the `steps` array, not just the current step
+- After using `navigate_step` tool, read the recipe JSON to get the new step's details from the `steps` array
+- Only use tools when necessary (navigation with `navigate_step`, external search)
+- Always confirm navigation commands and show the new step details
+- **NEVER mention what tools you can or cannot use** - just provide direct, confident answers
+- **NEVER say "I can't search" or "I don't have a tool for"** - parse the recipe JSON and answer directly
 - Be patient, clear, and helpful in all responses
 """  # noqa: E501
 
@@ -167,9 +188,8 @@ MODEL = "gemini-2.5-flash-lite"
 
 @dataclass
 class Deps:
-    """Dependencies for the hybrid agent."""
+    """Dependencies for the hybrid agent - only mutable state."""
 
-    recipe: Recipe
     current_step: int
 
 
@@ -177,22 +197,18 @@ def navigate_step(ctx: RunContext[Deps], action: str, step_number: int | None = 
     """Navigate to a different step in the recipe.
 
     Args:
-        ctx: The context containing recipe state
+        ctx: The context containing current step
         action: Navigation action - one of: "next", "previous", "goto", "first", "repeat"
         step_number: Required for "goto" action, ignored for others
 
     Returns:
-        str: Description of the new current step
+        str: Confirmation that step was updated. The LLM should then read the recipe JSON
+             from the system prompt to get the details of the new step.
     """
-    max_steps = len(ctx.deps.recipe.steps) if ctx.deps.recipe.steps else 0
-
-    if max_steps == 0:
-        return "No steps available in this recipe."
-
     current = ctx.deps.current_step
 
     if action == "next":
-        new_step = min(current + 1, max_steps)
+        new_step = current + 1
     elif action == "previous":
         new_step = max(current - 1, 1)
     elif action == "first":
@@ -202,31 +218,13 @@ def navigate_step(ctx: RunContext[Deps], action: str, step_number: int | None = 
     elif action == "goto":
         if step_number is None:
             return "Please specify a step number for 'goto' action."
-        new_step = max(1, min(step_number, max_steps))
+        new_step = max(1, step_number)
     else:
         return f"Invalid action '{action}'. Use: next, previous, goto, first, or repeat."
 
     ctx.deps.current_step = new_step
 
-    if new_step == 0:
-        return "You're at the beginning. Use 'next' to start step 1."
-
-    step = ctx.deps.recipe.steps[new_step - 1]
-
-    # Build response with step info
-    response = f"Step {new_step} of {max_steps}: {step.description}"
-
-    # Add ingredients if present in this step
-    if step.ingredients:
-        ing_list = [ing.model_dump(exclude_none=True) for ing in step.ingredients]
-        if ing_list:
-            response += f"\n\nIngredients needed: {json.dumps(ing_list, indent=2)}"
-
-    # Add tools if present in this step
-    if step.tools:
-        response += f"\n\nTools needed: {', '.join(step.tools)}"
-
-    return response
+    return f"Successfully navigated to step {new_step}. Now read the recipe JSON from the system context to get the details of step {new_step} and present them to the user."
 
 
 class HybridAgent:
@@ -245,6 +243,11 @@ class HybridAgent:
             ],
             deps_type=Deps,
         )
+
+        @self.agent.system_prompt
+        def _get_current_step(ctx: RunContext[Deps]) -> str:
+            return f"Current step: {ctx.deps.current_step}"
+
         self.current_recipe: Recipe | None = None
         self.current_step: int = 0
 
@@ -288,9 +291,8 @@ class HybridAgent:
                 ingredients, directions = scrape_recipe(url)
                 recipe_text = format_recipe_for_llm(url, ingredients, directions)
 
-            # Create a dummy recipe for deps during loading
-            dummy_recipe = Recipe(title="", url=url, ingredients=[], directions=[], steps=[])
-            deps = Deps(recipe=dummy_recipe, current_step=0)
+            # Create deps with just current_step for loading
+            deps = Deps(current_step=0)
 
             result = self.agent.run_sync(
                 f"Please parse this recipe and extract all information:\n\n{recipe_text}",
@@ -323,11 +325,11 @@ class HybridAgent:
         # Get recipe as JSON string
         recipe_json = self._get_recipe_context()
 
-        # Create deps
-        deps = Deps(recipe=self.current_recipe, current_step=self.current_step)
+        # Create deps with only current step (mutable state)
+        deps = Deps(current_step=self.current_step)
 
         try:
-            # Use instructions parameter instead of system_prompt
+            # Use instructions parameter to pass recipe JSON
             result = self.agent.run_sync(
                 question,
                 deps=deps,
