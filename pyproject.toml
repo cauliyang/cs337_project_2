@@ -60,6 +60,7 @@ homepage = "https://github.com/cauliyang/cs337_project_2"
 
 [project.scripts]
 recipebot-llm = "recipebot.llm.cli:app"
+recipebot-hybrid = "recipebot.hybrid.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["."] # Current directory

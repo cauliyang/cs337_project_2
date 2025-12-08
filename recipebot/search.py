@@ -21,6 +21,7 @@ def modify_query(query: str) -> str:
 
 
 def search_youtube(query, max_results=5):
+    """Search YouTube for videos related to the query."""
     query = modify_query(query)
 
     ydl_opts = {

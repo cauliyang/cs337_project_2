@@ -4,6 +4,13 @@ from bs4 import BeautifulSoup
 from recipebot.model import Ingredient
 
 
+def scrape_raw_html(url: str) -> str:
+    """Scrape raw HTML from URL."""
+    response = requests.get(url)
+    response.raise_for_status()
+    return response.text
+
+
 def extract_title_from_url(url: str) -> str:
     """Extract recipe title from URL."""
     # Extract last part of URL path and clean it up
